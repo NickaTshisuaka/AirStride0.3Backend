@@ -1,0 +1,162 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.home-container {
+  font-family: Arial, sans-serif;
+  background-color: #b5daff;
+  min-height: 100vh;
+}
+
+/* Hover zone */
+.navbar-hover-zone {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 100vh;
+  z-index: 1000;
+}
+
+/* Sidebar navbar (fixed duplicate bug) */
+.side-navbar {
+  position: fixed;
+  top: 0;
+  left: -260px; /* hidden initially */
+  width: 260px;
+  height: 100vh;
+  background: linear-gradient(180deg, #9fcfee, #538fb9);
+  color: white;
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.4);
+  transition: left 0.4s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  z-index: 999;
+}
+
+/* Show navbar when hovering trigger or navbar itself */
+.navbar-hover-zone:hover + .side-navbar,
+.side-navbar:hover {
+  left: 0;
+}
+
+/* App icon */
+.app-icon {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Navbar links */
+.navbar-links {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+}
+
+.navbar-links li {
+  position: relative;
+}
+
+.navbar-links li a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 20px;
+  color: white;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+
+.navbar-links li a:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Submenu */
+.submenu {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.05);
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, opacity 0.4s ease;
+  opacity: 0;
+}
+
+.navbar-links li:hover .submenu {
+  max-height: 300px;
+  opacity: 1;
+}
+
+.submenu a {
+  padding: 10px 40px;
+  font-size: 0.9rem;
+  color: white;
+}
+
+.submenu a:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Hero section */
+.hero-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100vh;
+  background: linear-gradient(to right, #b5daff 40%, transparent 60%),
+    url("./home-dashboard-picture.jpg") no-repeat center right;
+  background-size: cover; /* FIXED pixelation */
+  padding: 50px;
+  position: relative;
+  opacity: 0;
+  animation: fadeIn 1.5s ease-in-out forwards;
+}
+
+/* Hero text */
+.hero-left {
+  flex: 1;
+}
+
+.hero-left h1 {
+  font-size: 4.5rem;
+  color: #007acc;
+}
+
+.hero-left p {
+  font-size: 1.6rem;
+  color: #333;
+  margin-top: 15px;
+}
+
+/* Button */
+.cta-button {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  padding: 12px 25px;
+  font-size: 1.1rem;
+  background-color: #f58220;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.cta-button:hover {
+  background-color: #e26c00;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}

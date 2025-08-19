@@ -1,0 +1,168 @@
+.account-container {
+  padding: 60px 20px;
+  background: #b5daff;
+  min-height: 100vh;
+  font-family: 'Roboto', sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.account-container.dark {
+  background: #121212;
+  color: #eee;
+}
+
+.account-container h1 {
+  text-align: center;
+  color: #007acc;
+  margin-bottom: 40px;
+  font-size: 3rem;
+}
+
+/* Profile Circle */
+.profile-circle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.profile-circle img {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 4px solid #007acc;
+  object-fit: cover;
+  margin-bottom: 15px;
+}
+
+.profile-circle input[type="file"] {
+  margin-top: 10px;
+}
+
+/* Account Card */
+.account-card {
+  max-width: 600px;
+  width: 100%;
+  background: white;
+  border-radius: 20px;
+  padding: 30px 40px;
+  box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.account-container.dark .account-card {
+  background: #1e1e1e;
+  color: #eee;
+}
+
+/* Form Fields */
+.form-section label {
+  display: flex;
+  flex-direction: column;
+  font-weight: bold;
+  color: #007acc;
+}
+
+.form-section input[type="text"],
+.form-section input[type="email"],
+.form-section input[type="password"] {
+  padding: 12px 15px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  margin-top: 5px;
+  font-size: 1rem;
+  transition: border 0.3s ease;
+}
+
+.form-section input:focus {
+  outline: none;
+  border: 2px solid #f58220;
+}
+
+/* Preferences */
+.preferences {
+  margin: 10px 0;
+}
+
+.toggle-switch {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 10px;
+  font-weight: bold;
+}
+
+.toggle-switch input {
+  display: none;
+}
+
+.toggle-switch .slider {
+  width: 50px;
+  height: 24px;
+  background-color: #ccc;
+  border-radius: 50px;
+  position: relative;
+  transition: 0.4s;
+}
+
+.toggle-switch .slider::before {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  left: 1px;
+  top: 1px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.4s;
+}
+
+.toggle-switch input:checked + .slider::before {
+  transform: translateX(26px);
+}
+
+.toggle-switch input:checked + .slider {
+  background-color: #007acc;
+}
+
+/* Buttons */
+.save-btn, .delete-btn {
+  padding: 12px 25px;
+  border-radius: 12px;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.save-btn {
+  background-color: #007acc;
+  color: white;
+}
+
+.save-btn:hover {
+  background-color: #005fa3;
+  transform: translateY(-2px);
+}
+
+.delete-btn {
+  background-color: #f58220;
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: #e06c00;
+  transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  .account-card {
+    padding: 20px;
+  }
+}
