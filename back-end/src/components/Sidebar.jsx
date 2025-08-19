@@ -29,7 +29,14 @@ const Sidebar = () => {
             </ul>
           </li>
           <li><Link to="/faq"><i className="fas fa-question-circle"></i> FAQ</Link></li>
-          <li><Link to="/account"><i className="fas fa-user-cog"></i> Account Settings</Link></li>
+<li className="has-submenu">
+  <Link to="/account"><i className="fas fa-user-cog"></i> Account Settings</Link>
+  <ul className="submenu">
+    <li><Link to="/account/profile">Profile</Link></li>
+    <li><Link to="/account/security">Security</Link></li>
+    <li><Link to="/account/preferences">Preferences</Link></li>
+  </ul>
+</li>
           <li><Link to="/logout"><i className="fas fa-sign-out-alt"></i> Logout</Link></li>
         </ul>
       </nav>

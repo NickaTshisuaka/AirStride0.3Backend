@@ -1,79 +1,58 @@
 import React, { useState } from "react";
 import "./AccountSettings.css";
+import Footer from "../../components/Footer/Footer";
 
 const AccountSettings = () => {
-  const [user, setUser] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    profilePic: "/default-profile.jpg",
-    darkMode: false,
-  });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setUser({ ...user, [name]: value });
-  };
-
-  const handleProfilePicChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setUser({ ...user, profilePic: URL.createObjectURL(file) });
-    }
-  };
+  const [darkMode, setDarkMode] = useState(false);
 
   const toggleDarkMode = () => {
-    setUser({ ...user, darkMode: !user.darkMode });
-    document.body.classList.toggle("dark-mode");
-  };
-
-  const handleSave = () => {
-    alert("Profile updated successfully!");
+    setDarkMode(!darkMode);
+    document.body.classList.toggle("dark-mode", !darkMode);
   };
 
   return (
-    <div className={`account-container ${user.darkMode ? "dark" : ""}`}>
+    <div className="account-page">
       <h1>Account Settings</h1>
+      <div className="settings-grid">
 
-      <div className="profile-circle">
-        <img src={user.profilePic} alt="Profile" />
-        <input type="file" accept="image/*" onChange={handleProfilePicChange} />
-      </div>
-
-      <div className="account-card">
-        <div className="form-section">
-          <label>
-            First Name
-            <input type="text" name="firstName" value={user.firstName} onChange={handleChange} />
-          </label>
-
-          <label>
-            Last Name
-            <input type="text" name="lastName" value={user.lastName} onChange={handleChange} />
-          </label>
-
-          <label>
-            Email
-            <input type="email" name="email" value={user.email} onChange={handleChange} />
-          </label>
-
-          <label>
-            Password
-            <input type="password" placeholder="Enter new password" />
-          </label>
-
-          <div className="preferences">
-            <label className="toggle-switch">
-              <input type="checkbox" checked={user.darkMode} onChange={toggleDarkMode} />
-              <span className="slider"></span>
-              Dark Mode
-            </label>
+        {/* Profile Card */}
+        <div className="settings-card">
+          <h2>Profile</h2>
+          <div className="profile-section">
+            <img src="/profile-placeholder.png" alt="Profile" className="profile-pic" />
+            <button className="upload-btn">Change Picture</button>
           </div>
-
-          <button className="save-btn" onClick={handleSave}>Save Changes</button>
-          <button className="delete-btn">Delete Account</button>
+          <input type="text" placeholder="First Name" defaultValue="John" />
+          <input type="text" placeholder="Last Name" defaultValue="Doe" />
+          <input type="email" placeholder="Email" defaultValue="john@example.com" />
+          <button className="save-btn">Save Changes</button>
         </div>
+
+        {/* Security */}
+        <div className="settings-card">
+          <h2>Security</h2>
+          <input type="password" placeholder="New Password" />
+          <input type="password" placeholder="Confirm Password" />
+          <button className="save-btn">Update Password</button>
+        </div>
+
+        {/* Preferences */}
+        <div className="settings-card">
+          <h2>Preferences</h2>
+          <label>
+            <input type="checkbox" /> Receive Notifications
+          </label>
+          <label>
+            <input type="checkbox" /> Make Profile Private
+          </label>
+          <button onClick={toggleDarkMode} className="save-btn">
+            {darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          </button>
+        </div>
+
       </div>
+
+      <Footer />
     </div>
   );
 };
