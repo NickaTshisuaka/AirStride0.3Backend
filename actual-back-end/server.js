@@ -1,100 +1,96 @@
-const express = require('express');
-const cors = require('cors');
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+import express from "express";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import cors from "cors";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import User from "./models/User.js";
+import productRoutes from "./routes/productRoutes.js";
+
+dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT || 3001;
+const MONGO_URI = process.env.MONGO_URI;
+const JWT_SECRET = process.env.JWT_SECRET || "superSecretKey"; // set in .env
 
 // Middleware
-app.use(cors({
-  origin: 'http://localhost:5173', // Frontend origin
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
-}));
 app.use(express.json());
+app.use(cors());
 
 // Connect to MongoDB
-mongoose.connect('mongodb+srv://nicka20060108:Tshisuaka.19@airstride.w9zddd0.mongodb.net/')
-  .then(() => console.log(' Connected to MongoDB'))
-  .catch((err) => console.error('MongoDB connection error:', err));
+mongoose
+  .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
-// Updated User Schema
-const userSchema = new mongoose.Schema({
-  firstName: String,
-  lastName: String,
-  email: { type: String, unique: true },
-  password: String,
-});
-const User = mongoose.model('users', userSchema);
+// 🔹 Generate JWT
+const generateToken = (user) => {
+  return jwt.sign(
+    { id: user._id, email: user.email },
+    JWT_SECRET,
+    { expiresIn: "1h" }
+  );
+};
 
-// Basic Auth Middleware
-const authMiddleware = async (req, res, next) => {
+// 🔹 Auth Middleware
+const authMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Basic ')) {
-    return res.status(401).send('Missing or invalid Authorization header');
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Missing or invalid token" });
   }
-
-  const base64Credentials = authHeader.split(' ')[1];
-  const credentials = Buffer.from(base64Credentials, 'base64').toString('utf-8');
-  const [email, password] = credentials.split(':');
-
+  const token = authHeader.split(" ")[1];
   try {
-    const user = await User.findOne({ email });
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).send('Invalid credentials');
-    }
-    req.user = user;
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded; // attach user info to request
     next();
   } catch (err) {
-    res.status(500).send('Server error');
+    return res.status(401).json({ error: "Invalid token" });
   }
 };
 
-// Root Route
-app.get('/', (req, res) => {
-  res.send(' API is running');
-});
-
-//  Updated Signup to expect firstName & lastName
-app.post('/users/signup', async (req, res) => {
-  const { firstName, lastName, email, password } = req.body;
-
-  console.log('Signup payload:', req.body);
-
-  if (!firstName || !lastName || !email || !password) {
-    return res.status(400).json({ error: 'All fields are required' });
-  }
-
+// 🔹 Signup Route
+app.post("/users/signup", async (req, res) => {
+  const { email, password } = req.body;
   try {
-    const hashed = await bcrypt.hash(password, 10);
-    const user = new User({ firstName, lastName, email, password: hashed });
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: "User already exists" });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ email, password: hashedPassword });
     await user.save();
-    res.status(201).json({ message: 'User created successfully' });
+    res.status(201).json({
+      message: "User created successfully",
+      token: generateToken(user),
+    });
   } catch (err) {
-    console.error('Signup error:', err);
-    res.status(400).json({ error: 'Email may already be in use' });
+        console.error("Signup Error:", err);   // 🔹 add this
+    res.status(500).json({ error: err.message });
   }
 });
 
-//  Updated Login Response to return user details
-app.post('/users/login', authMiddleware, (req, res) => {
-  const { firstName, lastName, email } = req.user;
-  res.json({
-    message: 'Login successful',
-    user: { firstName, lastName, email }
-  });
+// 🔹 Login Route
+app.post("/users/login", async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(401).json({ error: "Invalid credentials" });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
+
+    res.json({
+      message: "Login successful",
+      token: generateToken(user),
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-//  Protected Products Route
-app.get('/api/products', authMiddleware, (req, res) => {
-  res.json([
-    { id: 1, name: 'HoverPod X', price: 1200 },
-    { id: 2, name: 'HoverSneak Elite', price: 950 },
-  ]);
-});
+// 🔹 Protected Products Route
+app.use("/api/products", authMiddleware, productRoutes);
 
-// Start Server
-const PORT = 3001;
-app.listen(PORT, () => {
-  console.log(` Server running on http://localhost:${PORT}`);
-});
+// Start server
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

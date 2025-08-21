@@ -1,15 +1,16 @@
-// src/pages/Logout/Logout.jsx
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuthentication } from "../../AuthContext";
 import "./Logout.css";
 
 const Logout = () => {
   const navigate = useNavigate();
+  const { logout } = useAuthentication();
 
   useEffect(() => {
-    localStorage.removeItem("user"); // Clear session
-    setTimeout(() => navigate("/login"), 1500); // Redirect after delay
-  }, [navigate]);
+    logout();
+    setTimeout(() => navigate("/signinlogin"), 1500);
+  }, [logout, navigate]);
 
   return (
     <div className="logout-container">

@@ -1,102 +1,118 @@
-import React, { useState, useEffect } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuthentication } from './AuthContext';
-import MarathonAnimation from './assets/animations/Marathon.json';
-import Lottie from 'lottie-react';
-import './SigninLogin.css';
+import React, { useState, useEffect } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
+import { useAuthentication } from "./AuthContext";
+import MarathonAnimation from "./assets/animations/Marathon.json";
+import Lottie from "lottie-react";
+import "./SigninLogin.css";
 
-const Animation = () => {
-  return (
-    <div className="animation-wrapper">
-      <Lottie animationData={MarathonAnimation} loop={false} />
-    </div>
-  );
-};
-
+const Animation = () => (
+  <div className="animation-wrapper">
+    <Lottie animationData={MarathonAnimation} loop={false} />
+  </div>
+);
 
 const SigninLogin = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showAnimation, setShowAnimation] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
-
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    firstName: '',
-    lastName: ''
+    email: "",
+    password: "",
+    confirmPassword: "",
+    firstName: "",
+    lastName: "",
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const { login, signup, isAuthenticated } = useAuthentication();
-  const location = useLocation();
+  const { login, signup, isAuthenticated, loading } = useAuthentication();
+  const navigate = useNavigate();
 
-  // Default to home if no "from" page
-  const from = (location.state && location.state.from?.pathname) || '/home';
-
-  // Animation timing
   useEffect(() => {
     const fadeTimer = setTimeout(() => setFadeOut(true), 4500);
     const hideTimer = setTimeout(() => setShowAnimation(false), 5000);
-
     return () => {
       clearTimeout(fadeTimer);
       clearTimeout(hideTimer);
     };
   }, []);
 
-  if (isAuthenticated) {
-    return <Navigate to={from} replace />;
+  if (!loading && isAuthenticated) {
+    // return <Navigate to="/home" />;
   }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (error) setError('');
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (error) setError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
 
     try {
       if (isLogin) {
         if (!formData.email || !formData.password) {
-          setError('Please fill in all fields');
+          setError("Please fill in all fields");
+          setIsLoading(false);
           return;
         }
+
         const result = await login(formData.email, formData.password);
-        if (!result || !result.success) {
-          setError(result?.error || 'Login failed');
+
+        if (result.success) {
+          navigate("/home", { replace: true });
+        } else {
+          setError(result.error);
         }
       } else {
-        if (!formData.email || !formData.password || !formData.firstName || !formData.lastName) {
-          setError('Please fill in all fields');
+        if (
+          !formData.email ||
+          !formData.password ||
+          !formData.firstName ||
+          !formData.lastName
+        ) {
+          setError("Please fill in all fields");
+          setIsLoading(false);
           return;
         }
         if (formData.password !== formData.confirmPassword) {
-          setError('Passwords do not match');
+          setError("Passwords do not match");
+          setIsLoading(false);
           return;
         }
         if (formData.password.length < 6) {
-          setError('Password must be at least 6 characters long');
+          setError("Password must be at least 6 characters long");
+          setIsLoading(false);
           return;
         }
+
         const result = await signup({
           email: formData.email,
           password: formData.password,
           firstName: formData.firstName,
-          lastName: formData.lastName
+          lastName: formData.lastName,
         });
-        if (!result || !result.success) {
-          setError(result?.error || 'Signup failed');
+
+        if (result.success) {
+          setIsLogin(true);
+          setFormData({
+            email: formData.email,
+            password: "",
+            confirmPassword: "",
+            firstName: "",
+            lastName: "",
+          });
+          setError("Signup successful! Please log in.");
+        } else {
+          setError(result.error);
         }
       }
     } catch (err) {
-      setError('An unexpected error occurred');
       console.error(err);
+      setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -105,18 +121,18 @@ const SigninLogin = () => {
   const toggleForm = () => {
     setIsLogin(!isLogin);
     setFormData({
-      email: '',
-      password: '',
-      confirmPassword: '',
-      firstName: '',
-      lastName: ''
+      email: "",
+      password: "",
+      confirmPassword: "",
+      firstName: "",
+      lastName: "",
     });
-    setError('');
+    setError("");
   };
 
   const handleSocialLogin = (provider) => {
     console.log(`${provider} login clicked`);
-    setError('Social login not implemented yet');
+    setError("Social login not implemented yet");
   };
 
   return (
@@ -126,21 +142,20 @@ const SigninLogin = () => {
           <Animation />
         </div>
       )}
-
       {!showAnimation && (
         <div className="auth-container">
           <div className="auth-wrapper">
             <div className="auth-card">
               <div className="auth-header">
-                <h2>{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
-                <p>{isLogin ? 'Sign in to your account' : 'Sign up for a new account'}</p>
+                <h2>{isLogin ? "Welcome Back" : "Create Account"}</h2>
+                <p>
+                  {isLogin
+                    ? "Sign in to your account"
+                    : "Sign up for a new account"}
+                </p>
               </div>
 
-              {error && (
-                <div className="error-message">
-                  {error}
-                </div>
-              )}
+              {error && <div className="error-message">{error}</div>}
 
               <form onSubmit={handleSubmit} className="auth-form">
                 {!isLogin && (
@@ -215,22 +230,26 @@ const SigninLogin = () => {
 
                 {isLogin && (
                   <div className="forgot-password">
-                    <a href="#" className="forgot-link">Forgot your password?</a>
+                    <a href="#" className="forgot-link">
+                      Forgot your password?
+                    </a>
                   </div>
                 )}
 
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="auth-button"
                   disabled={isLoading}
                 >
                   {isLoading ? (
                     <span className="loading-text">
                       <span className="loading-spinner-small"></span>
-                      {isLogin ? 'Signing In...' : 'Signing Up...'}
+                      {isLogin ? "Signing In..." : "Signing Up..."}
                     </span>
+                  ) : isLogin ? (
+                    "Sign In"
                   ) : (
-                    isLogin ? 'Sign In' : 'Sign Up'
+                    "Sign Up"
                   )}
                 </button>
               </form>
@@ -240,18 +259,18 @@ const SigninLogin = () => {
               </div>
 
               <div className="social-login">
-                <button 
+                <button
                   type="button"
                   className="social-button google"
-                  onClick={() => handleSocialLogin('Google')}
+                  onClick={() => handleSocialLogin("Google")}
                   disabled={isLoading}
                 >
                   Continue with Google
                 </button>
-                <button 
+                <button
                   type="button"
                   className="social-button github"
-                  onClick={() => handleSocialLogin('GitHub')}
+                  onClick={() => handleSocialLogin("GitHub")}
                   disabled={isLoading}
                 >
                   Continue with GitHub
@@ -260,14 +279,16 @@ const SigninLogin = () => {
 
               <div className="auth-footer">
                 <p>
-                  {isLogin ? "Don't have an account? " : "Already have an account? "}
-                  <button 
-                    type="button" 
-                    onClick={toggleForm} 
+                  {isLogin
+                    ? "Don't have an account? "
+                    : "Already have an account? "}
+                  <button
+                    type="button"
+                    onClick={toggleForm}
                     className="toggle-button"
                     disabled={isLoading}
                   >
-                    {isLogin ? 'Sign up' : 'Sign in'}
+                    {isLogin ? "Sign up" : "Sign in"}
                   </button>
                 </p>
               </div>

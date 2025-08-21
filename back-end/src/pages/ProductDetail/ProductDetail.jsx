@@ -3,14 +3,12 @@ import { useParams } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import "./ProductDetail.css";
 
-// Mock data for now
 const mockProducts = [
   {
     id: "1",
     name: "Breathing Trainer",
     price: "$49.99",
-    description:
-      "Enhance your lung capacity and endurance with this professional breathing trainer.",
+    description: "Enhance your lung capacity and endurance with this professional breathing trainer.",
     images: [
       "https://picsum.photos/400/400?random=1",
       "https://picsum.photos/400/400?random=11",
@@ -55,12 +53,9 @@ const ProductDetail = () => {
   return (
     <div className="product-detail-container">
       <Sidebar />
-
       <div className="product-detail-content">
-        {/* Main Image */}
         <div className="product-image">
           <img src={mainImage} alt={product.name} />
-          {/* Thumbnail Carousel */}
           <div className="thumbnail-carousel">
             {product.images.map((img, idx) => (
               <img
@@ -73,8 +68,6 @@ const ProductDetail = () => {
             ))}
           </div>
         </div>
-
-        {/* Product Info */}
         <div className="product-info">
           <h1>{product.name}</h1>
           <h2 className="product-price">{product.price}</h2>

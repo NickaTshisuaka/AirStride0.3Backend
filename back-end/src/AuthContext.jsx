@@ -1,12 +1,11 @@
-import { createContext, useState, useEffect, useContext } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
-// Create context
 const AuthContext = createContext();
 
-// Auth Provider
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const savedToken = localStorage.getItem("auth_token");
@@ -14,37 +13,32 @@ export const AuthProvider = ({ children }) => {
       setToken(savedToken);
       setIsAuthenticated(true);
     }
+    setLoading(false);
   }, []);
 
   const login = async (email, password) => {
-    const basicAuth = btoa(`${email}:${password}`);
-
     try {
       const res = await fetch("http://localhost:3001/users/login", {
         method: "POST",
-        headers: {
-          Authorization: `Basic ${basicAuth}`,
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
 
-      if (res.ok) {
+      if (res.ok && data.token) {
         localStorage.setItem("auth_token", data.token);
-        localStorage.setItem("auth_email", email);
-        localStorage.setItem("auth_password", password);
         setToken(data.token);
         setIsAuthenticated(true);
-        return { success: true };
+        return { success: true, token: data.token };
       } else {
-        return { success: false, error: data?.message || "Login failed" };
+        return { success: false, error: data?.error || "Login failed" };
       }
     } catch (error) {
+      console.error("Login error:", error);
       return { success: false, error: "Login error" };
     }
   };
-
   const signup = async ({ email, password, firstName, lastName }) => {
     try {
       const res = await fetch("http://localhost:3001/users/signup", {
@@ -56,55 +50,33 @@ export const AuthProvider = ({ children }) => {
       const data = await res.json();
 
       if (res.ok) {
-        localStorage.setItem("auth_token", data.token);
-        localStorage.setItem("auth_email", email);
-        localStorage.setItem("auth_password", password);
-        setToken(data.token);
-        setIsAuthenticated(true);
         return { success: true };
       } else {
-        return { success: false, error: data?.message || "Signup failed" };
+        return { success: false, error: data?.error || "Signup failed" };
       }
     } catch (error) {
+      console.error("Signup error:", error);
       return { success: false, error: "Signup error" };
     }
   };
-
   const logout = () => {
     setToken(null);
     setIsAuthenticated(false);
     localStorage.removeItem("auth_token");
-    localStorage.removeItem("auth_email");
-    localStorage.removeItem("auth_password");
-  };
-
-  const getAuthHeaders = () => {
-    const email = localStorage.getItem("auth_email");
-    const password = localStorage.getItem("auth_password");
-
-    if (!email || !password) return {};
-
-    const basicAuth = btoa(`${email}:${password}`);
-    return {
-      Authorization: `Basic ${basicAuth}`,
-    };
   };
 
   return (
     <AuthContext.Provider
-      value={{
-        isAuthenticated,
-        token,
-        login,
-        logout,
-        signup,
-        getAuthHeaders,
-      }}
+      value={{ isAuthenticated, token, login, signup, logout, loading }}
     >
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Hook for easier access
-export const useAuthentication = () => useContext(AuthContext);
+export const useAuthentication = () => {
+  const context = useContext(AuthContext);
+  if (!context)
+    throw new Error("useAuthentication must be used within AuthProvider");
+  return context;
+};
