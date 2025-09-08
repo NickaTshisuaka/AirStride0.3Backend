@@ -1,41 +1,55 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./AccountSettings.css";
 
 const AccountSettings = () => {
   const [activeTab, setActiveTab] = useState("profile");
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(
+    localStorage.getItem("darkMode") === "true"
+  );
+  const [profileImage, setProfileImage] = useState(null);
+  const [firstName, setFirstName] = useState("Nicka");
+  const [lastName, setLastName] = useState("Tshisuaka");
+
+  // Persist theme globally
+  useEffect(() => {
+    localStorage.setItem("darkMode", darkMode);
+    document.documentElement.setAttribute(
+      "data-theme",
+      darkMode ? "dark" : "light"
+    );
+  }, [darkMode]);
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => setProfileImage(e.target.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const getInitials = () => {
+    return `${firstName[0] || ""}${lastName[0] || ""}`.toUpperCase();
+  };
 
   return (
-    <div className={`account-container ${darkMode ? "dark" : ""}`}>
+    <div className="account-container">
       <h1>Account Settings</h1>
-      <p className="account-tagline">Manage your profile, preferences, and appearance</p>
+      <p className="account-tagline">
+        Manage your profile, preferences, and appearance
+      </p>
 
       {/* Top Tab Navigation */}
       <div className="tab-nav">
-        <button
-          className={activeTab === "profile" ? "active" : ""}
-          onClick={() => setActiveTab("profile")}
-        >
-          Profile
-        </button>
-        <button
-          className={activeTab === "password" ? "active" : ""}
-          onClick={() => setActiveTab("password")}
-        >
-          Password
-        </button>
-        <button
-          className={activeTab === "notifications" ? "active" : ""}
-          onClick={() => setActiveTab("notifications")}
-        >
-          Notifications
-        </button>
-        <button
-          className={activeTab === "appearance" ? "active" : ""}
-          onClick={() => setActiveTab("appearance")}
-        >
-          Appearance
-        </button>
+        {["profile", "password", "notifications", "appearance"].map((tab) => (
+          <button
+            key={tab}
+            className={activeTab === tab ? "active" : ""}
+            onClick={() => setActiveTab(tab)}
+          >
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+          </button>
+        ))}
       </div>
 
       {/* Content */}
@@ -43,32 +57,62 @@ const AccountSettings = () => {
         {activeTab === "profile" && (
           <div className="account-card">
             <div className="profile-header">
-              <img src="/profile-pic.jpg" alt="Profile" className="profile-avatar" />
-              <div>
-                <button className="btn">Upload New</button>
-                <button className="btn delete">Delete Avatar</button>
+              <div className="profile-avatar">
+                {profileImage ? (
+                  <img src={profileImage} alt="Profile" />
+                ) : (
+                  <span className="initials">{getInitials()}</span>
+                )}
+              </div>
+              <div className="avatar-buttons">
+                <label className="btn">
+                  Upload New
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    style={{ display: "none" }}
+                  />
+                </label>
+                <button
+                  className="btn delete"
+                  onClick={() => setProfileImage(null)}
+                >
+                  Delete Avatar
+                </button>
               </div>
             </div>
             <form>
               <div className="form-group">
                 <label>First Name</label>
-                <input type="text" defaultValue="Nicka" />
+                <input
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
               </div>
               <div className="form-group">
                 <label>Last Name</label>
-                <input type="text" defaultValue="Tshisuaka" />
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                />
               </div>
               <div className="form-group">
                 <label>Email</label>
-                <input type="email" defaultValue="nicka@example.com" />
+                <input type="email"  />
               </div>
               <div className="form-group">
                 <label>Phone</label>
-                <input type="tel" defaultValue="+27 082 555 1122" />
+                <input type="tel"  />
               </div>
               <div className="form-group">
                 <label>Address</label>
-                <input type="text" defaultValue="123 Blue Street, Cape Town, SA" />
+                <input
+                  type="text"
+                  
+                />
               </div>
               <button className="save-btn">Save Changes</button>
             </form>

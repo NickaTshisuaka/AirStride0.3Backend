@@ -1,31 +1,16 @@
+// backend/routes/products.js
 import express from "express";
-import { getProducts } from "../controllers/productController.js";
-import Product from "../models/Product.js"; // <-- ADD THIS LINE
+import Product from "../models/Product.js"; // your mongoose model
+
 const router = express.Router();
 
-// @desc Get all products
-// @route GET /api/products
+// GET all products
 router.get("/", async (req, res) => {
   try {
-    const products = await Product.find(); // fetches all products from MongoDB
-    res.json(products); // sends them as JSON to the frontend
+    const products = await Product.find();
+    res.json(products);
   } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// @desc Get single product by ID
-// @route GET /api/products/:id
-router.get("/:id", async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id); // fetch one product
-    if (product) {
-      res.json(product);
-    } else {
-      res.status(404).json({ message: "Product not found" });
-    }
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: "Failed to fetch products" });
   }
 });
 

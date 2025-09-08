@@ -1,99 +1,79 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuthentication } from "../../AuthContext.jsx";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { products } from "../../data/products"; // all 31 products
 import "./Products.css";
 
 function Products() {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const { isAuthenticated, token } = useAuthentication();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      setError(null);
+  // Cart state: loads from localStorage on mount
+  const [cartCount, setCartCount] = useState(
+    JSON.parse(localStorage.getItem("cart"))?.length || 0
+  );
 
-      if (!isAuthenticated) {
-        navigate("/signinlogin");
-        return;
-      }
-
-      try {
-        const response = await fetch("http://localhost:3001/api/products", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (response.status === 401) {
-          // Token invalid, log out user
-          localStorage.removeItem("auth_token");
-          navigate("/signinlogin");
-          return;
-        }
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch products");
-        }
-
-        const data = await response.json();
-        setProducts(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, [isAuthenticated, token, navigate]);
-
-  const handleAddToCart = (product) => {
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-    const existing = cart.find((item) => item._id === product._id);
-    if (existing) {
-      existing.quantity += 1;
-    } else {
-      cart.push({ ...product, quantity: 1 });
-    }
-
+  // Add product to cart
+  const addToCart = (product) => {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    cart.push(product);
     localStorage.setItem("cart", JSON.stringify(cart));
-    navigate("/cart");
+    setCartCount(cart.length);
   };
 
-  if (loading) return <p className="loading">Loading products...</p>;
-  if (error) return <p className="error">{error}</p>;
+  // Update cart count if localStorage changes in another tab
+  useEffect(() => {
+    const handleStorage = () => {
+      setCartCount(JSON.parse(localStorage.getItem("cart"))?.length || 0);
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
 
   return (
     <div className="products-page">
-      <h1 className="products-title">Our Catalog</h1>
+      {/* Header */}
+      <div className="products-header">
+        <h1 className="products-title">Our Products</h1>
+        <div
+          className="cart-icon"
+          onClick={() => navigate("/cart")}
+        >
+          🛒
+          <span className="cart-count">{cartCount}</span>
+        </div>
+      </div>
+
+      {/* Product grid */}
       <div className="products-grid">
         {products.map((product) => (
-          <div className="product-card" key={product._id}>
-            <div className="product-image">
-              <img
-                src={product.image || "https://via.placeholder.com/200"}
-                alt={product.name}
-              />
-            </div>
-            <div className="product-info">
-              <h2 className="product-name">{product.name}</h2>
-              <p className="product-description">{product.description}</p>
-              <p className="product-price">R {product.price}</p>
-              <button
-                className="add-to-cart"
-                onClick={() => handleAddToCart(product)}
-              >
-                Add to Cart
-              </button>
-            </div>
+          <div key={product._id} className="product-card">
+            <Link to={`/product/${product._id}`} className="product-link">
+              <div className="product-image-container">
+                <img
+                  src={product.img}
+                  alt={product.name}
+                  className="product-image"
+                  onError={(e) => (e.target.src = "/images/default.jpeg")}
+                />
+              </div>
+              <div className="product-info">
+                <h3 className="product-name">{product.name}</h3>
+                <p className="product-price">R{product.price}</p>
+              </div>
+            </Link>
+            <button
+              className="add-to-cart"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                addToCart(product);
+              }}
+            >
+              🛒 Add to Cart
+            </button>
           </div>
         ))}
       </div>
+      
     </div>
   );
 }

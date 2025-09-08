@@ -1,27 +1,44 @@
+/* ---------- Light Mode ---------- */
 :root {
-  --bg-color: #f7f9fc;
-  --text-color: #1a1a1a;
-  --card-bg: #ffffff;
-  --gradient: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+  --bg-color: #576a7d;         /* page background */
+  --text-color: #007acc;       /* main text */
+  --card-bg: #f0f8ff;          /* card/container background */
+  --accent-color: #f58220;     /* buttons, highlights */
+  --secondary-color: #007acc;  /* secondary buttons, headings */
 }
 
+/* ---------- Dark Mode ---------- */
 [data-theme="dark"] {
-  --bg-color: #0e0e12;
-  --text-color: #f5f5f5;
-  --card-bg: #1a1a1d;
-  --gradient: linear-gradient(135deg, #141e30 0%, #243b55 100%);
+  --bg-color: #0b1225;
+  --text-color: #cfd9ff;
+  --card-bg: #16253b;
+  --accent-color: #ff9f1c;
+  --secondary-color: #007acc;
 }
 
+/* ---------- Apply globally ---------- */
 body {
   background: var(--bg-color);
   color: var(--text-color);
   transition: all 0.3s ease;
+  font-family: 'Roboto', sans-serif;
 }
 
-.card {
+.card, .account-card, .product-card, .faq-item {
   background: var(--card-bg);
+  color: var(--text-color);
   border-radius: 12px;
-  padding: 1rem;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Buttons */
+button {
+  background-color: var(--secondary-color);
+  color: white;
   transition: background 0.3s ease;
+}
+
+button:hover {
+  background-color: var(--accent-color);
 }

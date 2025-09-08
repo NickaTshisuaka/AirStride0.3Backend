@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect } from "react";
+// src/AuthContext.jsx
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
 
@@ -23,22 +24,19 @@ export const AuthProvider = ({ children }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-
       const data = await res.json();
-
       if (res.ok && data.token) {
         localStorage.setItem("auth_token", data.token);
         setToken(data.token);
         setIsAuthenticated(true);
         return { success: true, token: data.token };
-      } else {
-        return { success: false, error: data?.error || "Login failed" };
       }
-    } catch (error) {
-      console.error("Login error:", error);
+      return { success: false, error: data?.error || "Login failed" };
+    } catch (err) {
       return { success: false, error: "Login error" };
     }
   };
+
   const signup = async ({ email, password, firstName, lastName }) => {
     try {
       const res = await fetch("http://localhost:3001/users/signup", {
@@ -46,23 +44,18 @@ export const AuthProvider = ({ children }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, firstName, lastName }),
       });
-
       const data = await res.json();
-
-      if (res.ok) {
-        return { success: true };
-      } else {
-        return { success: false, error: data?.error || "Signup failed" };
-      }
-    } catch (error) {
-      console.error("Signup error:", error);
+      if (res.ok) return { success: true };
+      return { success: false, error: data?.error || "Signup failed" };
+    } catch (err) {
       return { success: false, error: "Signup error" };
     }
   };
+
   const logout = () => {
+    localStorage.removeItem("auth_token");
     setToken(null);
     setIsAuthenticated(false);
-    localStorage.removeItem("auth_token");
   };
 
   return (
@@ -75,8 +68,5 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuthentication = () => {
-  const context = useContext(AuthContext);
-  if (!context)
-    throw new Error("useAuthentication must be used within AuthProvider");
-  return context;
+  return useContext(AuthContext) || {};
 };

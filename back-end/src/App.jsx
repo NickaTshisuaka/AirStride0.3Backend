@@ -15,6 +15,7 @@ import SigninLogin from "./SigninLogin.jsx";
 import Products from "./pages/Products/Products.jsx";
 import ProductDetail from "./pages/ProductDetail/ProductDetail.jsx";
 import Cart from "./pages/Cart/Cart.jsx";
+import OrderSummary from "./pages/OrderSummary/OrderSummary.jsx";
 
 // Optional extra pages
 import FAQ from "./pages/FAQ/FAQ.jsx";
@@ -23,6 +24,7 @@ import Account from "./pages/Account/AccountSettings.jsx";
 import Logout from "./pages/Logout/Logout.jsx";
 
 import "./App.css";
+import Checkout from "./pages/Checkout/Checkout.jsx";
 
 function App() {
   return (
@@ -72,6 +74,22 @@ function App() {
                 </ProtectedRoute>
               }
             />
+               <Route
+              path="/Checkout"
+              element={
+                <ProtectedRoute>
+                  <Checkout />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+  path="/order-summary"
+  element={
+    <ProtectedRoute>
+      <OrderSummary />
+    </ProtectedRoute>
+  }
+/>
             <Route
               path="/about"
               element={

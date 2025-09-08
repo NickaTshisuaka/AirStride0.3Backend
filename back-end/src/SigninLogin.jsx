@@ -2,12 +2,21 @@ import React, { useState, useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuthentication } from "./AuthContext";
 import MarathonAnimation from "./assets/animations/Marathon.json";
+import HeartbeatAnimation from "./assets/animation2/Heartbeat.json";
 import Lottie from "lottie-react";
 import "./SigninLogin.css";
 
-const Animation = () => (
+// Intro animation wrapper
+const IntroAnimation = () => (
   <div className="animation-wrapper">
     <Lottie animationData={MarathonAnimation} loop={false} />
+  </div>
+);
+
+// Background looping animation
+const BackgroundAnimation = () => (
+  <div className="auth-bg">
+    <Lottie animationData={HeartbeatAnimation} loop={true} />
   </div>
 );
 
@@ -15,6 +24,7 @@ const SigninLogin = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showAnimation, setShowAnimation] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
+  const [showHeartbeat, setShowHeartbeat] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -28,9 +38,13 @@ const SigninLogin = () => {
   const { login, signup, isAuthenticated, loading } = useAuthentication();
   const navigate = useNavigate();
 
+  // Handle intro animation fade
   useEffect(() => {
     const fadeTimer = setTimeout(() => setFadeOut(true), 4500);
-    const hideTimer = setTimeout(() => setShowAnimation(false), 5000);
+    const hideTimer = setTimeout(() => {
+      setShowAnimation(false);
+      setShowHeartbeat(true);
+    }, 5000);
     return () => {
       clearTimeout(fadeTimer);
       clearTimeout(hideTimer);
@@ -38,7 +52,7 @@ const SigninLogin = () => {
   }, []);
 
   if (!loading && isAuthenticated) {
-    // return <Navigate to="/home" />;
+    return <Navigate to="/home" replace />;
   }
 
   const handleInputChange = (e) => {
@@ -56,16 +70,14 @@ const SigninLogin = () => {
       if (isLogin) {
         if (!formData.email || !formData.password) {
           setError("Please fill in all fields");
-          setIsLoading(false);
           return;
         }
 
         const result = await login(formData.email, formData.password);
-
-        if (result.success) {
+        if (result?.success) {
           navigate("/home", { replace: true });
         } else {
-          setError(result.error);
+          setError(result?.error || "Login failed");
         }
       } else {
         if (
@@ -75,17 +87,16 @@ const SigninLogin = () => {
           !formData.lastName
         ) {
           setError("Please fill in all fields");
-          setIsLoading(false);
           return;
         }
+
         if (formData.password !== formData.confirmPassword) {
           setError("Passwords do not match");
-          setIsLoading(false);
           return;
         }
+
         if (formData.password.length < 6) {
           setError("Password must be at least 6 characters long");
-          setIsLoading(false);
           return;
         }
 
@@ -96,7 +107,7 @@ const SigninLogin = () => {
           lastName: formData.lastName,
         });
 
-        if (result.success) {
+        if (result?.success) {
           setIsLogin(true);
           setFormData({
             email: formData.email,
@@ -105,13 +116,16 @@ const SigninLogin = () => {
             firstName: "",
             lastName: "",
           });
-          setError("Signup successful! Please log in.");
+          setError("");
+          setTimeout(() => {
+            setError("Signup successful! Please log in.");
+          }, 100);
         } else {
-          setError(result.error);
+          setError(result?.error || "Signup failed");
         }
       }
     } catch (err) {
-      console.error(err);
+      console.error("Auth Error:", err);
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);
@@ -139,15 +153,17 @@ const SigninLogin = () => {
     <>
       {showAnimation && (
         <div className={`animation-overlay ${fadeOut ? "fade-out" : ""}`}>
-          <Animation />
+          <IntroAnimation />
         </div>
       )}
+
       {!showAnimation && (
-        <div className="auth-container">
-          <div className="auth-wrapper">
-            <div className="auth-card">
+        <div className="auth-container gradient-bg">
+          {showHeartbeat && <BackgroundAnimation />}
+          <div className="auth-wrapper glass-card">
+            <div className="auth-form-wrapper">
               <div className="auth-header">
-                <h2>{isLogin ? "Welcome Back" : "Create Account"}</h2>
+                <h2>{isLogin ? "Welcome Back 👋" : "Create Account 🚀"}</h2>
                 <p>
                   {isLogin
                     ? "Sign in to your account"
@@ -255,25 +271,59 @@ const SigninLogin = () => {
               </form>
 
               <div className="auth-divider">
-                <span>or</span>
+                <span>or continue with</span>
               </div>
 
+              {/* Social icons */}
               <div className="social-login">
                 <button
                   type="button"
                   className="social-button google"
                   onClick={() => handleSocialLogin("Google")}
-                  disabled={isLoading}
                 >
-                  Continue with Google
+                  <i className="fab fa-google"></i>
                 </button>
                 <button
                   type="button"
                   className="social-button github"
                   onClick={() => handleSocialLogin("GitHub")}
-                  disabled={isLoading}
                 >
-                  Continue with GitHub
+                  <i className="fab fa-github"></i>
+                </button>
+                <button
+                  type="button"
+                  className="social-button facebook"
+                  onClick={() => handleSocialLogin("Facebook")}
+                >
+                  <i className="fab fa-facebook-f"></i>
+                </button>
+                <button
+                  type="button"
+                  className="social-button twitter"
+                  onClick={() => handleSocialLogin("Twitter")}
+                >
+                  <i className="fab fa-twitter"></i>
+                </button>
+                <button
+                  type="button"
+                  className="social-button linkedin"
+                  onClick={() => handleSocialLogin("LinkedIn")}
+                >
+                  <i className="fab fa-linkedin-in"></i>
+                </button>
+                <button
+                  type="button"
+                  className="social-button instagram"
+                  onClick={() => handleSocialLogin("Instagram")}
+                >
+                  <i className="fab fa-instagram"></i>
+                </button>
+                <button
+                  type="button"
+                  className="social-button tiktok"
+                  onClick={() => handleSocialLogin("TikTok")}
+                >
+                  <i className="fab fa-tiktok"></i>
                 </button>
               </div>
 

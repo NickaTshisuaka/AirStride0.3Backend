@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import "./FAQ.css";
+import FAQChat from "./FAQChat.jsx"; // AI Chatbot component
 import Footer from "../../components/Footer/Footer";
-
+import "./FAQStyles.css";
 
 const FAQ = () => {
   const [openIndex, setOpenIndex] = useState(null);
@@ -58,7 +58,11 @@ const FAQ = () => {
   return (
     <div className="faq-container">
       <h1>Frequently Asked Questions</h1>
+      <p className="faq-intro">
+        Have a question about any sports equipment or products? You can ask our AI chatbot below or browse the FAQs.
+      </p>
 
+      {/* Search bar */}
       <div className="faq-search">
         <input
           type="text"
@@ -68,16 +72,20 @@ const FAQ = () => {
         />
       </div>
 
+      {/* FAQ List */}
       <div className="faq-list">
         {Object.keys(groupedFaqs).map((topic) => (
           <div key={topic} className="faq-topic-group">
             <h2 className="faq-topic">{topic}</h2>
-            {groupedFaqs[topic].map((faq, index) => (
-              <div key={index} className={`faq-item ${openIndex === faq.q ? "open" : ""}`}>
-                <div className="faq-question" onClick={() => toggleFAQ(faq.q)}>
+            {groupedFaqs[topic].map((faq) => (
+              <div
+                key={faq.q}
+                className={`faq-item ${openIndex === faq.q ? "open" : ""}`}
+                onClick={() => toggleFAQ(faq.q)}
+              >
+                <div className="faq-question">
                   {faq.q}
                   <span className={`faq-arrow ${openIndex === faq.q ? "open" : ""}`}>▾</span>
-                  {/* <span className="faq-badge">{faq.topic}</span> */}
                 </div>
                 <div className="faq-answer">{faq.a}</div>
               </div>
@@ -86,6 +94,7 @@ const FAQ = () => {
         ))}
       </div>
 
+      {/* Submit Question Form */}
       <div className="faq-submit">
         <h2>Ask a Question</h2>
         <textarea
@@ -95,7 +104,10 @@ const FAQ = () => {
         />
         <button onClick={handleAddQuestion}>Submit Question</button>
       </div>
-      
+
+      {/* AI Chatbot */}
+      <FAQChat />
+
       {/* Footer */}
       <Footer />
     </div>
