@@ -8,6 +8,7 @@ import fs from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
+
 dotenv.config();
 
 const app = express();
@@ -130,7 +131,8 @@ app.use(
       if (!origin) return cb(null, true);
       const allowed =
        ["http://localhost:5173",
-         "http://127.0.0.1:5173"];
+         "http://127.0.0.1:5173",
+        "http://www.airstride0.3.co.za.s3-website-us-east-1.amazonaws.com"];
       if (allowed.indexOf(origin) !== -1) return cb(null, true);
       return cb(new Error('Not allowed by CORS'));
     },
