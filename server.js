@@ -11,6 +11,7 @@ import bcrypt from 'bcryptjs'; // for hashing passwords
 import cors from 'cors'
 // import admin from 'firebase-admin'
 import fs from "fs";
+import path from 'path';
 // axios is installed per requirement but not used here. It is useful if you want to call other APIs.
 
 dotenv.config(); // loads .env variables into process.env
@@ -27,6 +28,10 @@ if (!MONGO_URI) {
 // const serviceAccount = JSON.parse(
 //   fs.readFileSync("./airstride-3317d-firebase-adminsdk-fbsvc-1163621a02.json","utf8")
 // );
+
+
+const serviceAccountPath = path.resolve('./airstride-3317d-firebase-adminsdk-fbsvc-c61338a4c8.json');
+const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
 
 // Initialize Firebase Admin SDK
 admin.initializeApp({
