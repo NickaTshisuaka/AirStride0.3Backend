@@ -1,20 +1,14 @@
-// server.js
-// Basic Express server with MongoDB, full CRUD for products & orders,
-// users collection for signup + Basic Auth protected endpoints.
-// Dependencies: express, mongodb, dotenv, base-64, bcryptjs, axios (optional)
-
 import dotenv from 'dotenv';
 import express from 'express';
 import { MongoClient, ObjectId } from 'mongodb';
-import base64 from 'base-64'; // for decoding Basic Auth header
-import bcrypt from 'bcryptjs'; // for hashing passwords
-import cors from 'cors'
-import admin from 'firebase-admin'
-import fs from "fs";
-import path from 'path';
-// axios is installed per requirement but not used here. It is useful if you want to call other APIs.
+import bcrypt from 'bcryptjs';
+import cors from 'cors';
+import admin from 'firebase-admin';
+import fs from 'fs';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 
-dotenv.config(); // loads .env variables into process.env
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -25,21 +19,28 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
-// const serviceAccount = JSON.parse(
-//   fs.readFileSync("./airstride-3317d-firebase-adminsdk-fbsvc-1163621a02.json","utf8")
-// );
+// ESM-safe __dirname and service account path
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const serviceAccountPath = join(__dirname, 'airstride-3317d-firebase-adminsdk-fbsvc-c61338a4c8.json');
 
-
-const serviceAccountPath = path.resolve('./airstride-3317d-firebase-adminsdk-fbsvc-c61338a4c8.json');
-const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+// Load Firebase service account
+let serviceAccount;
+try {
+  const rawJson = fs.readFileSync(serviceAccountPath, 'utf8');
+  serviceAccount = JSON.parse(rawJson);
+  console.log('Firebase service account loaded successfully');
+} catch (err) {
+  console.error('Failed to load Firebase service account JSON:', err);
+  process.exit(1);
+}
 
 // Initialize Firebase Admin SDK
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
-// You can now use admin.auth() or admin.firestore() from your server
-const database= admin.firestore()
+const database = admin.firestore();
 
 // Create a MongoClient and connect once at startup
 const client = new MongoClient(MONGO_URI, {
