@@ -9,7 +9,7 @@ import { MongoClient, ObjectId } from 'mongodb';
 import base64 from 'base-64'; // for decoding Basic Auth header
 import bcrypt from 'bcryptjs'; // for hashing passwords
 import cors from 'cors'
-// import admin from 'firebase-admin'
+import admin from 'firebase-admin'
 import fs from "fs";
 import path from 'path';
 // axios is installed per requirement but not used here. It is useful if you want to call other APIs.
