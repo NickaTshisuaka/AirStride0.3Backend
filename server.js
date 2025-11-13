@@ -131,6 +131,7 @@ app.use(
       if (!origin) return cb(null, true);
       const allowed =
        ["http://localhost:5173",
+        "*",
          "http://127.0.0.1:5173",
         "http://www.airstride0.3.co.za.s3-website-us-east-1.amazonaws.com"];
       if (allowed.indexOf(origin) !== -1) return cb(null, true);
@@ -139,6 +140,56 @@ app.use(
     credentials: true,
   })
 );
+
+// ----------------------
+// GET USER BY EMAIL
+// ----------------------
+app.get("/users/email/:email", async (req, res) => {
+  try {
+    const { email } = req.params;
+    const user = await db.collection("users").findOne({ email });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const { passwordHash, ...userData } = user; // remove sensitive info
+    res.json(userData);
+  } catch (err) {
+    console.error('/users/email/:email error', err);
+    res.status(500).json({ error: "Server error fetching user" });
+  }
+});
+// ----------------------
+// UPDATE USER BY EMAIL
+// ----------------------
+app.put("/users/email/:email", async (req, res) => {
+  try {
+    const { email } = req.params;
+    const allowed = ["firstName", "lastName", "phone", "address", "profileImg"];
+    const updateFields = {};
+
+    for (const field of allowed) {
+      if (req.body[field] !== undefined) updateFields[field] = req.body[field];
+    }
+
+    if (Object.keys(updateFields).length === 0) {
+      return res.status(400).json({ error: "No valid fields to update" });
+    }
+
+    const result = await db.collection("users").findOneAndUpdate(
+      { email },
+      { $set: updateFields },
+      { returnDocument: "after" }
+    );
+
+    if (!result.value) return res.status(404).json({ error: "User not found" });
+    const { passwordHash, ...userData } = result.value; // hide password
+    res.json(userData);
+  } catch (err) {
+    console.error('/users/email/:email PUT error', err);
+    res.status(500).json({ error: "Server error updating user" });
+  }
+});
+
+
 // Configuration
 
 /* ----------------------
@@ -152,11 +203,14 @@ Request body (JSON):
      400 Bad Request for missing/invalid fields
      409 Conflict if username already exists
 */
+// ----------------------
+// PUBLIC ROUTE: SIGNUP
+// ----------------------
 app.post('/signup', async (req, res) => {
   try {
-    const { username, password, email } = req.body;
-    if (!username || !password) {
-      return res.status(400).json({ error: 'username and password are required' });
+    const { username, password, email, firstName, lastName, phone, address } = req.body;
+    if (!username || !password || !firstName || !lastName) {
+      return res.status(400).json({ error: 'Username, password, firstName, and lastName are required' });
     }
 
     const usersColl = db.collection('users');
@@ -165,16 +219,19 @@ app.post('/signup', async (req, res) => {
       return res.status(409).json({ error: 'Username already taken' });
     }
 
-    // Hash password with bcrypt (salt rounds 10)
-    const saltRounds = 10;
-    const passwordHash = await bcrypt.hash(password, saltRounds);
+    // Hash password
+    const passwordHash = await bcrypt.hash(password, 10);
 
     const newUser = {
       username,
-      email: email || null,
+      firstName,
+      lastName,
+      email: email || "",
+      phone: phone || "",
+      address: address || "",
+      profileImg: "", // can update later
       passwordHash,
       createdAt: new Date(),
-      // add any other user fields as needed
     };
 
     const result = await usersColl.insertOne(newUser);
