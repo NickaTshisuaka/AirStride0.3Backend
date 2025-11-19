@@ -12,26 +12,26 @@ import authRoutes from "./routes/authRoutes.js";
 dotenv.config();
 const app = express();
 
-// Middleware
-import cors from "cors";
-
+// CORS
 app.use(cors({
-  origin: "*", 
+  origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
 app.options("*", cors());
 
+// 🔥 FIX: Required for parsing JSON on ALL requests
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-
-// Routes
+// ROUTES
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 
-// Start server after DB connects
+// START SERVER
 connectDB().then(() => {
   app.listen(process.env.PORT || 5000, () =>
     console.log(`API running on port ${process.env.PORT}`)
