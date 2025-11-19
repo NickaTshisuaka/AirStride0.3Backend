@@ -20,6 +20,7 @@ app.use(
         "http://localhost:5173",
         "https://airstride.co.za",
         "http://www.airstride.co.za",
+        "http://www.airstride0.3.co.za",
         "http://airstride0.3.co.za.s3-website-us-east-1.amazonaws.com",
         "http://www.airstride0.3.co.za.s3-website-us-east-1.amazonaws.com",
         "null", // for some static site requests
