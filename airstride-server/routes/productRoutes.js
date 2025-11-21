@@ -11,6 +11,11 @@ import {
 const router = express.Router();
 
 // PUBLIC ROUTES
+router.use((req, res, next) => {
+  console.log("Products route hit:", req.method, req.originalUrl);
+  next();
+});
+
 router.get("/", getAllProducts);
 router.get("/:id", getProductById);
 

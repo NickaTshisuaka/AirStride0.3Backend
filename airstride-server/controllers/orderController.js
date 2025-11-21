@@ -1,4 +1,4 @@
-import { getDB } from "../config/database.js";
+import { getDB } from "../../../back-end/src/config/database.js";
 import { ObjectId } from "mongodb";
 
 export const createOrder = async (req, res) => {

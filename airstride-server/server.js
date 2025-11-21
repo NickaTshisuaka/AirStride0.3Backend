@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
-import { connectDB } from "./config/database.js";
-import "./config/firebase.js"; 
+import { connectDB } from "../../back-end/src/config/database.js";
+import "../../back-end/src/config/firebase.js"; 
 
 import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";

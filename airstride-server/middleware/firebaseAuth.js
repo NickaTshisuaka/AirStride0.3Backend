@@ -1,4 +1,4 @@
-import admin from "../config/firebase.js";
+import admin from "../../../back-end/src/config/firebase.js";
 
 export async function firebaseAuth(req, res, next) {
   const header = req.headers.authorization;
