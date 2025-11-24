@@ -1,32 +1,27 @@
-import { ObjectId } from "mongodb";
-import { getDB } from "../config/mongoClient.js";
+import express from "express";
+import { firebaseAuth } from "../middleware/firebaseAuth.js";
+import {
+  getAllProducts,
+  createProduct,
+  getProductById,
+  updateProduct,
+  deleteProduct
+} from "../controllers/productController.js";
 
-export const getProductById = async (req, res) => {
-  try {
-    const db = getDB();
-    const id = req.params.id;
+const router = express.Router();
 
-    console.log("PARAM ID RECEIVED:", id);
+// PUBLIC ROUTES
+router.use((req, res, next) => {
+  console.log("Products route hit:", req.method, req.originalUrl);
+  next();
+});
 
-    console.log("Requested Product ID:", id);
+router.get("/", getAllProducts);
+router.get("/:id", getProductById);
 
-    // Validate MongoDB ObjectId
-    if (!ObjectId.isValid(id)) {
-      return res.status(400).json({ message: "Invalid product ID format" });
-    }
+// PROTECTED ROUTES
+router.post("/", firebaseAuth, createProduct);
+router.put("/:id", firebaseAuth, updateProduct);
+router.delete("/:id", firebaseAuth, deleteProduct);
 
-    const product = await db
-      .collection("products")
-      .findOne({ _id: new ObjectId(id) });
-
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-
-    res.status(200).json(product);
-
-  } catch (error) {
-    console.error("Error fetching product:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
+export default router;
