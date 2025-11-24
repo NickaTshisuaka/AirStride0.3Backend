@@ -6,6 +6,8 @@ export const getProductById = async (req, res) => {
     const db = getDB();
     const id = req.params.id;
 
+    console.log("PARAM ID RECEIVED:", id);
+
     console.log("Requested Product ID:", id);
 
     // Validate MongoDB ObjectId
