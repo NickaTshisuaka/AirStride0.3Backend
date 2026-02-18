@@ -1,4 +1,4 @@
-import { getDB } from "../../../back-end/src/config/database.js";
+import { getDB } from "../config/database.js";
 
 export const getUserByEmail = async (req, res) => {
   try {
