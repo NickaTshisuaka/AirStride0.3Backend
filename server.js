@@ -23,9 +23,8 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
-app.options("*", cors());
-
-// 🔥 FIX: Required for parsing JSON on ALL requests
+app.options(/.*/, cors());
+// FIX: Required for parsing JSON on ALL requests
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
