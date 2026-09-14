@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
-import { getDB } from "../config/database.js";
+import { supabase } from "../config/supabase.js";
+
 
 export const signup = async (req, res) => {
   try {

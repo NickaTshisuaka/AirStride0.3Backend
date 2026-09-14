@@ -1,4 +1,5 @@
-import { getDB } from "../config/database.js";
+import { supabase } from "../config/supabase.js";
+
 
 export const getUserByEmail = async (req, res) => {
   try {

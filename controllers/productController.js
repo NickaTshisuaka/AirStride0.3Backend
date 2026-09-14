@@ -1,4 +1,4 @@
-import { connectDB } from "../config/database.js";
+import { supabase } from "../config/supabase.js";
 import { ObjectId } from "mongodb";
 
 export const getAllProducts = async (req, res) => {
