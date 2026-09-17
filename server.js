@@ -9,6 +9,8 @@ import orderRoutes from "./routes/orderRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 
+import { supabase } from "./config/supabase.js";
+
 dotenv.config();
 const app = express();
 
