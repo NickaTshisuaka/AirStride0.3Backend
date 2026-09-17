@@ -1,12 +1,12 @@
 import { supabase } from "../config/supabase.js";
-import { ObjectId } from "mongodb";
+// import { ObjectId } from "mongodb";
 
 export const getAllProducts = async (req, res) => {
   try {
     const products = await getDB().collection("products").find().toArray();
     res.json(products);
   } catch {
-    res.status(500).json({ error: "Failed to fetch products" });
+    res.status(500).jJson({ error: "Failed to fetch products" });
   }
 };
 

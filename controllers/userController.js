@@ -3,7 +3,8 @@ import { supabase } from "../config/supabase.js";
 
 export const getUserByEmail = async (req, res) => {
   try {
-    const user = await getDB().collection("users").findOne({ email: req.params.email });
+    // const user = await getDB().collection("users").findOne({ email: req.params.email });
+    
 
     if (!user) return res.status(404).json({ error: "User not found" });
 
