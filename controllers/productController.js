@@ -1,62 +1,143 @@
-import { supabase } from "../config/supabase.js";
-// import { ObjectId } from "mongodb";
+import { supabase } from "../config/database.js";
 
 export const getAllProducts = async (req, res) => {
   try {
-    const products = await getDB().collection("products").find().toArray();
+    const { data: products, error } = await supabase
+      .from("products")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Get products error:", error);
+
+      return res.status(500).json({
+        error: "Failed to fetch products",
+      });
+    }
+
     res.json(products);
-  } catch {
-    res.status(500).jJson({ error: "Failed to fetch products" });
+  } catch (err) {
+    console.error("Get products error:", err);
+
+    res.status(500).json({
+      error: "Failed to fetch products",
+    });
   }
 };
 
 export const createProduct = async (req, res) => {
   try {
-    const result = await getDB().collection("products").insertOne({
+    const productData = {
       ...req.body,
-      createdAt: new Date(),
-    });
+    };
 
-    res.status(201).json({ _id: result.insertedId, ...req.body });
-  } catch {
-    res.status(500).json({ error: "Failed to create product" });
+    const { data: product, error } = await supabase
+      .from("products")
+      .insert(productData)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Create product error:", error);
+
+      return res.status(500).json({
+        error: "Failed to create product",
+      });
+    }
+
+    res.status(201).json(product);
+  } catch (err) {
+    console.error("Create product error:", err);
+
+    res.status(500).json({
+      error: "Failed to create product",
+    });
   }
 };
 
 export const getProductById = async (req, res) => {
   try {
-    const product = await getDB()
-      .collection("products")
-      .findOne({ _id: new ObjectId(req.params.id) });
+    const { id } = req.params;
 
-    if (!product) return res.status(404).json({ error: "Not found" });
+    const { data: product, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error || !product) {
+      return res.status(404).json({
+        error: "Product not found",
+      });
+    }
 
     res.json(product);
-  } catch {
-    res.status(500).json({ error: "Error fetching product" });
+  } catch (err) {
+    console.error("Get product error:", err);
+
+    res.status(500).json({
+      error: "Error fetching product",
+    });
   }
 };
 
 export const updateProduct = async (req, res) => {
   try {
-    await getDB()
-      .collection("products")
-      .updateOne({ _id: new ObjectId(req.params.id) }, { $set: req.body });
+    const { id } = req.params;
 
-    res.json({ message: "Updated successfully" });
-  } catch {
-    res.status(500).json({ error: "Failed to update product" });
+    const { data: product, error } = await supabase
+      .from("products")
+      .update(req.body)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error || !product) {
+      console.error("Update product error:", error);
+
+      return res.status(404).json({
+        error: "Product not found",
+      });
+    }
+
+    res.json({
+      message: "Updated successfully",
+      product,
+    });
+  } catch (err) {
+    console.error("Update product error:", err);
+
+    res.status(500).json({
+      error: "Failed to update product",
+    });
   }
 };
 
 export const deleteProduct = async (req, res) => {
   try {
-    await getDB()
-      .collection("products")
-      .deleteOne({ _id: new ObjectId(req.params.id) });
+    const { id } = req.params;
 
-    res.json({ message: "Product deleted" });
-  } catch {
-    res.status(500).json({ error: "Failed to delete product" });
+    const { data: product, error } = await supabase
+      .from("products")
+      .delete()
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error || !product) {
+      return res.status(404).json({
+        error: "Product not found",
+      });
+    }
+
+    res.json({
+      message: "Product deleted",
+    });
+  } catch (err) {
+    console.error("Delete product error:", err);
+
+    res.status(500).json({
+      error: "Failed to delete product",
+    });
   }
 };

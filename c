@@ -6,7 +6,7 @@ export const createOrder = async (req, res) => {
 
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({
-        error: "Order must contain items",
+        error: "Order must contain items"
       });
     }
 
@@ -19,13 +19,13 @@ export const createOrder = async (req, res) => {
         item.quantity <= 0
       ) {
         return res.status(400).json({
-          error: "Invalid item structure",
+          error: "Invalid item structure"
         });
       }
 
       if (typeof item.price !== "number" || item.price < 0) {
         return res.status(400).json({
-          error: "Invalid product price",
+          error: "Invalid product price"
         });
       }
 
@@ -35,7 +35,7 @@ export const createOrder = async (req, res) => {
     const orderData = {
       user_id: req.user?.uid || null,
       total,
-      status: status || "pending",
+      status: status || "pending"
     };
 
     const { data: order, error: orderError } = await supabase
@@ -47,7 +47,7 @@ export const createOrder = async (req, res) => {
     if (orderError) {
       console.error("Create order error:", orderError);
       return res.status(500).json({
-        error: "Server error creating order",
+        error: "Server error creating order"
       });
     }
 
@@ -56,7 +56,7 @@ export const createOrder = async (req, res) => {
       product_id: String(item.productId),
       product_name: item.productName || null,
       quantity: item.quantity,
-      unit_price: item.price,
+      unit_price: item.price
     }));
 
     const { data: insertedItems, error: itemsError } = await supabase
@@ -68,55 +68,60 @@ export const createOrder = async (req, res) => {
       console.error("Create order items error:", itemsError);
 
       // Remove the order if its items could not be created
-      await supabase.from("orders").delete().eq("id", order.id);
+      await supabase
+        .from("orders")
+        .delete()
+        .eq("id", order.id);
 
       return res.status(500).json({
-        error: "Server error creating order items",
+        error: "Server error creating order items"
       });
     }
 
     res.status(201).json({
       ...order,
-      items: insertedItems,
+      items: insertedItems
     });
+
   } catch (err) {
     console.error("Create order error:", err);
 
     res.status(500).json({
-      error: "Server error creating order",
+      error: "Server error creating order"
     });
   }
 };
+
 
 export const getAllOrders = async (req, res) => {
   try {
     const { data: orders, error } = await supabase
       .from("orders")
-      .select(
-        `
+      .select(`
         *,
         order_items (*)
-      `,
-      )
+      `)
       .order("created_at", { ascending: false });
 
     if (error) {
       console.error("Get orders error:", error);
 
       return res.status(500).json({
-        error: "Server error fetching orders",
+        error: "Server error fetching orders"
       });
     }
 
     res.json(orders);
+
   } catch (err) {
     console.error("Get orders error:", err);
 
     res.status(500).json({
-      error: "Server error fetching orders",
+      error: "Server error fetching orders"
     });
   }
 };
+
 
 export const getOrderById = async (req, res) => {
   try {
@@ -124,30 +129,30 @@ export const getOrderById = async (req, res) => {
 
     const { data: order, error } = await supabase
       .from("orders")
-      .select(
-        `
+      .select(`
         *,
         order_items (*)
-      `,
-      )
+      `)
       .eq("id", id)
       .single();
 
     if (error || !order) {
       return res.status(404).json({
-        error: "Order not found",
+        error: "Order not found"
       });
     }
 
     res.json(order);
+
   } catch (err) {
     console.error("Get order error:", err);
 
     res.status(500).json({
-      error: "Server error",
+      error: "Server error"
     });
   }
 };
+
 
 export const updateOrder = async (req, res) => {
   try {
@@ -161,7 +166,7 @@ export const updateOrder = async (req, res) => {
 
     if (Object.keys(update).length === 0) {
       return res.status(400).json({
-        error: "No valid fields to update",
+        error: "No valid fields to update"
       });
     }
 
@@ -174,19 +179,21 @@ export const updateOrder = async (req, res) => {
 
     if (error || !order) {
       return res.status(404).json({
-        error: "Order not found",
+        error: "Order not found"
       });
     }
 
     res.json(order);
+
   } catch (err) {
     console.error("Update order error:", err);
 
     res.status(500).json({
-      error: "Server error updating order",
+      error: "Server error updating order"
     });
   }
 };
+
 
 export const deleteOrder = async (req, res) => {
   try {
@@ -201,18 +208,19 @@ export const deleteOrder = async (req, res) => {
 
     if (error || !order) {
       return res.status(404).json({
-        error: "Order not found",
+        error: "Order not found"
       });
     }
 
     res.json({
-      message: "Order deleted",
+      message: "Order deleted"
     });
+
   } catch (err) {
     console.error("Delete order error:", err);
 
     res.status(500).json({
-      error: "Server error deleting order",
+      error: "Server error deleting order"
     });
   }
 };
