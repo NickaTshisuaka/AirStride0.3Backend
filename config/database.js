@@ -1,14 +1,28 @@
-import { MongoClient } from "mongodb";
+import { createClient } from "@supabase/supabase-js";
+import "dotenv/config";
 
-const client = new MongoClient(process.env.MONGO_URI);
-let db;
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 
-export async function connectDB() {
-  await client.connect();
-  db = client.db();
-  console.log("MongoDB connected");
+if (!supabaseUrl || !supabaseServiceKey) {
+  throw new Error("Missing Supabase environment variables");
 }
 
-export function getDB() {
-  return db;
+export const supabase = createClient(
+  supabaseUrl,
+  supabaseServiceKey
+);
+
+export async function connectDB() {
+  const { error } = await supabase
+    .from("orders")
+    .select("id")
+    .limit(1);
+
+  if (error) {
+    console.error("Supabase connection failed:", error.message);
+    throw error;
+  }
+
+  console.log("Supabase connected");
 }

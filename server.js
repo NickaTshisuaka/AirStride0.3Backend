@@ -1,19 +1,14 @@
-import dotenv from "dotenv";
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { connectDB } from "./config/database.js";
 import "./config/firebase.js";
-// import { connectDB } from "./config/database.js";
-// import "./config/firebase.js";
-
-
 
 import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 
-dotenv.config();
 const app = express();
 
 // CORS
