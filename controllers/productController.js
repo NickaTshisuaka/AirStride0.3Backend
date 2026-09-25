@@ -1,9 +1,9 @@
-import { connectDB } from "../config/database.js";
-import { ObjectId } from "mongodb";
+import supabase from "../config/supabase.js";
 
 export const getAllProducts = async (req, res) => {
   try {
-    const products = await getDB().collection("products").find().toArray();
+    const { data: products, error } = await supabase.from("products").select("*");
+    if (error) throw error;
     res.json(products);
   } catch {
     res.status(500).json({ error: "Failed to fetch products" });
@@ -12,10 +12,8 @@ export const getAllProducts = async (req, res) => {
 
 export const createProduct = async (req, res) => {
   try {
-    const result = await getDB().collection("products").insertOne({
-      ...req.body,
-      createdAt: new Date(),
-    });
+    const { data: result, error } = await supabase.from("products").insert([req.body]).select().single();
+    if (error) throw error;
 
     res.status(201).json({ _id: result.insertedId, ...req.body });
   } catch {
@@ -25,9 +23,7 @@ export const createProduct = async (req, res) => {
 
 export const getProductById = async (req, res) => {
   try {
-    const product = await getDB()
-      .collection("products")
-      .findOne({ _id: new ObjectId(req.params.id) });
+    const { data: product, error } = await supabase.from("products").select("*").eq("id", req.params.id).single();
 
     if (!product) return res.status(404).json({ error: "Not found" });
 
@@ -39,9 +35,8 @@ export const getProductById = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
   try {
-    await getDB()
-      .collection("products")
-      .updateOne({ _id: new ObjectId(req.params.id) }, { $set: req.body });
+   const { data: result, error } = await supabase.from("products").update(req.body).eq("id", req.params.id);
+    if (error) throw error;
 
     res.json({ message: "Updated successfully" });
   } catch {
@@ -51,9 +46,8 @@ export const updateProduct = async (req, res) => {
 
 export const deleteProduct = async (req, res) => {
   try {
-    await getDB()
-      .collection("products")
-      .deleteOne({ _id: new ObjectId(req.params.id) });
+    const { data: result, error } = await supabase.from("products").delete().eq("id", req.params.id);
+    if (error) throw error;
 
     res.json({ message: "Product deleted" });
   } catch {
