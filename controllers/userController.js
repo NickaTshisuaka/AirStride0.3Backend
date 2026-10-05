@@ -54,15 +54,14 @@ export const getUserByEmail = async (req, res) => {
   try {
     const { data: user, error } = await supabase.from("users").select("*").eq("email", req.params.email).single();
 
+  }
     if (error) {
       console.error("Supabase User Error:", error);
 
-<<<<<<< HEAD
     if (error || !user) {
       return res.status(404).json({
         error: "User not found",
       });
-=======
       if (error.code === "PGRST116") {return res.status(404).json({ error: "User not found"});
       }
 
@@ -70,7 +69,6 @@ export const getUserByEmail = async (req, res) => {
     }
 
     if (!user) { return res.status(404).json({error: "User not found"});
->>>>>>> 0b9fbae56d3853349af76c238f91d6889dfef963
     }
 
     delete user.passwordHash;
@@ -79,24 +77,20 @@ export const getUserByEmail = async (req, res) => {
   } catch (err) {
     console.error("Get User Error:", err);
 
-<<<<<<< HEAD
     res.status(500).json({
       error: "Server error fetching user",
-=======
+
     return res.status(500).json({
       error: "Couldn't get user"
->>>>>>> 0b9fbae56d3853349af76c238f91d6889dfef963
+
     });
-  }
+  })
+}
 };
 
 export const updateUserByEmail = async (req, res) => {
   try {
-<<<<<<< HEAD
     const { email } = req.params;
-
-=======
->>>>>>> 0b9fbae56d3853349af76c238f91d6889dfef963
     const allowed = ["firstName", "lastName", "phone", "address", "profileImg"];
 
     const updates = {};
@@ -138,13 +132,11 @@ export const updateUserByEmail = async (req, res) => {
   } catch (err) {
     console.error("Update User Error:", err);
 
-<<<<<<< HEAD
     res.status(500).json({
       error: "Server error updating user",
-=======
     return res.status(500).json({
       error: "Couldn't update user"
->>>>>>> 0b9fbae56d3853349af76c238f91d6889dfef963
     });
-  }
+  })
+}
 };

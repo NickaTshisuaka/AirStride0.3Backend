@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-import { supabase } from "../config/database.js";
-=======
 import { supabase } from "../config/supabase.js";
 // import { ObjectId } from "mongodb";
 
@@ -92,78 +89,61 @@ import { supabase } from "../config/supabase.js";
 //     res.status(500).json({ error: "Server error deleting order" });
 //   }
 // };
->>>>>>> 0b9fbae56d3853349af76c238f91d6889dfef963
+
+import { supabase } from "../config/supabase.js"; // Adjust the import path as needed
 
 export const createOrder = async (req, res) => {
   try {
     const { items, status } = req.body;
 
-<<<<<<< HEAD
     if (!Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({
-        error: "Order must contain items",
-      });
-=======
-    if (!Array.isArray(items) || items.length === 0) {return res.status(400).json({error: "Order must contain items"});
->>>>>>> 0b9fbae56d3853349af76c238f91d6889dfef963
+      return res.status(400).json({ error: "Order must contain items" });
     }
 
     let total = 0;
 
+    // Validate items and calculate total price
     for (const item of items) {
-<<<<<<< HEAD
-      if (
-        !item.productId ||
-        typeof item.quantity !== "number" ||
-        item.quantity <= 0
-      ) {
-        return res.status(400).json({
-          error: "Invalid item structure",
-        });
+      if (!item.productId || typeof item.quantity !== "number" || item.quantity <= 0) {
+        return res.status(400).json({ error: "Invalid item structure" });
       }
 
       if (typeof item.price !== "number" || item.price < 0) {
-        return res.status(400).json({
-          error: "Invalid product price",
-        });
+        return res.status(400).json({ error: "Invalid product price" });
       }
 
       total += item.price * item.quantity;
     }
 
-    const orderData = {
+    const orderPayload = {
       user_id: req.user?.uid || null,
       total,
       status: status || "pending",
+      created_at: new Date().toISOString(),
     };
-=======
-      if (!item.productId || typeof item.quantity !== "number") { return res.status(400).json({error: "Invalid item structure"});
-      }
 
-      total += (item.price || 0) * item.quantity;
-    }
+    // 1. Insert the parent order
+    const { data: orderData, error: orderError } = await supabase
+      .from("orders")
+      .insert(orderPayload)
+      .select("*")
+      .single();
 
-    const order = { user_id: req.user?.uid || null, items, total, status: status || "pending", created_at: new Date().toISOString()};
->>>>>>> 0b9fbae56d3853349af76c238f91d6889dfef963
-
-    const { data, error } = await supabase.from("orders").insert(order).select("*").single();
-
-<<<<<<< HEAD
     if (orderError) {
-      console.error("Create order error:", orderError);
-      return res.status(500).json({
-        error: "Server error creating order",
-      });
+      console.error("Supabase Create Order Error:", orderError);
+      return res.status(500).json({ error: "Server error creating order" });
     }
 
+    // 2. Prepare child item objects with the new order ID
     const orderItems = items.map((item) => ({
-      order_id: order.id,
+      order_id: orderData.id,
       product_id: String(item.productId),
       product_name: item.productName || null,
       quantity: item.quantity,
       unit_price: item.price,
     }));
 
+    // 3. Insert child items into order_items
     const { data: insertedItems, error: itemsError } = await supabase
       .from("order_items")
       .insert(orderItems)
@@ -171,124 +151,69 @@ export const createOrder = async (req, res) => {
 
     if (itemsError) {
       console.error("Create order items error:", itemsError);
-
-      // Remove the order if its items could not be created
-      await supabase.from("orders").delete().eq("id", order.id);
-
-      return res.status(500).json({
-        error: "Server error creating order items",
-      });
+      // Rollback: Delete the parent order if child records fail
+      await supabase.from("orders").delete().eq("id", orderData.id);
+      return res.status(500).json({ error: "Server error creating order items" });
     }
 
-    res.status(201).json({
-      ...order,
+    // Return combined result
+    return res.status(201).json({
+      ...orderData,
       items: insertedItems,
     });
   } catch (err) {
-    console.error("Create order error:", err);
-
-    res.status(500).json({
-      error: "Server error creating order",
-    });
-=======
-    if (error) {
-      console.error("Supabase Create Order Error:", error);
-
-      return res.status(500).json({error: "Server error creating order"});
-    }
-
-    res.status(201).json(data);
-  } catch (err) {
-    console.error("Create order error:", err);
-
-    res.status(500).json({error: "Server error creating order"});
->>>>>>> 0b9fbae56d3853349af76c238f91d6889dfef963
+    console.error("Create order catch error:", err);
+    return res.status(500).json({ error: "Server error creating order" });
   }
 };
 
 export const getAllOrders = async (req, res) => {
   try {
-<<<<<<< HEAD
     const { data: orders, error } = await supabase
       .from("orders")
-      .select(
-        `
+      .select(`
         *,
         order_items (*)
-      `,
-      )
+      `)
       .order("created_at", { ascending: false });
-=======
-    const { data, error } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
->>>>>>> 0b9fbae56d3853349af76c238f91d6889dfef963
 
     if (error) {
       console.error("Supabase Get Orders Error:", error);
-
-<<<<<<< HEAD
-      return res.status(500).json({
-        error: "Server error fetching orders",
-      });
+      return res.status(500).json({ error: "Server error fetching orders" });
     }
 
-    res.json(orders);
+    return res.json(orders);
   } catch (err) {
     console.error("Get orders error:", err);
-
-    res.status(500).json({
-      error: "Server error fetching orders",
-    });
-=======
-      return res.status(500).json({error: "Server error fetching orders"});
-    }
-
-    res.json(data);
-  } catch (err) {
-    console.error("Get orders error:", err);
-
-    res.status(500).json({error: "Server error fetching orders"});
->>>>>>> 0b9fbae56d3853349af76c238f91d6889dfef963
+    return res.status(500).json({ error: "Server error fetching orders" });
   }
 };
 
 export const getOrderById = async (req, res) => {
   try {
-    const { data: order, error } = await supabase.from("orders").select("*").eq("id", req.params.id).single();
+    const { id } = req.params;
 
-<<<<<<< HEAD
     const { data: order, error } = await supabase
       .from("orders")
-      .select(
-        `
+      .select(`
         *,
         order_items (*)
-      `,
-      )
+      `)
       .eq("id", id)
       .single();
 
-    if (error || !order) {
-      return res.status(404).json({
-        error: "Order not found",
-      });
-=======
     if (error) {
       console.error("Supabase Get Order Error:", error);
-
-      if (error.code === "PGRST116") {return res.status(404).json({error: "Order not found"});
+      if (error.code === "PGRST116") {
+        return res.status(404).json({ error: "Order not found" });
       }
-
-      return res.status(500).json({error: "Server error"});
->>>>>>> 0b9fbae56d3853349af76c238f91d6889dfef963
+      return res.status(500).json({ error: "Server error" });
     }
 
-    res.json(order);
+    return res.json(order);
   } catch (err) {
     console.error("Get order error:", err);
-
-    res.status(500).json({
-      error: "Server error",
-    });
+    return res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -300,14 +225,8 @@ export const updateOrder = async (req, res) => {
       update.status = req.body.status;
     }
 
-    if (req.body.items !== undefined) {
-      update.items = req.body.items;
-    }
-
     if (Object.keys(update).length === 0) {
-      return res.status(400).json({
-        error: "No valid fields to update",
-      });
+      return res.status(400).json({ error: "No valid fields to update" });
     }
 
     const { data: order, error } = await supabase
@@ -317,33 +236,18 @@ export const updateOrder = async (req, res) => {
       .select("*")
       .single();
 
-<<<<<<< HEAD
-    if (error || !order) {
-      return res.status(404).json({
-        error: "Order not found",
-=======
     if (error) {
       console.error("Supabase Update Order Error:", error);
-
       if (error.code === "PGRST116") {
-        return res.status(404).json({
-          error: "Order not found"
-        });
+        return res.status(404).json({ error: "Order not found" });
       }
-
-      return res.status(500).json({
-        error: "Server error updating order"
->>>>>>> 0b9fbae56d3853349af76c238f91d6889dfef963
-      });
+      return res.status(500).json({ error: "Server error updating order" });
     }
 
-    res.json(order);
+    return res.json(order);
   } catch (err) {
     console.error("Update order error:", err);
-
-    res.status(500).json({
-      error: "Server error updating order",
-    });
+    return res.status(500).json({ error: "Server error updating order" });
   }
 };
 
@@ -356,38 +260,20 @@ export const deleteOrder = async (req, res) => {
       .select("*")
       .single();
 
-<<<<<<< HEAD
-    if (error || !order) {
-      return res.status(404).json({
-        error: "Order not found",
-=======
     if (error) {
       console.error("Supabase Delete Order Error:", error);
-
       if (error.code === "PGRST116") {
-        return res.status(404).json({
-          error: "Order not found"
-        });
+        return res.status(404).json({ error: "Order not found" });
       }
-
-      return res.status(500).json({
-        error: "Server error deleting order"
->>>>>>> 0b9fbae56d3853349af76c238f91d6889dfef963
-      });
+      return res.status(500).json({ error: "Server error deleting order" });
     }
 
-    res.json({
+    return res.json({
       message: "Order deleted",
-<<<<<<< HEAD
-=======
-      order: data
->>>>>>> 0b9fbae56d3853349af76c238f91d6889dfef963
+      order: data,
     });
   } catch (err) {
     console.error("Delete order error:", err);
-
-    res.status(500).json({
-      error: "Server error deleting order",
-    });
+    return res.status(500).json({ error: "Server error deleting order" });
   }
 };
