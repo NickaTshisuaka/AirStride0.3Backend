@@ -1,14 +1,18 @@
-import { MongoClient } from "mongodb";
+import "dotenv/config";
+import { createClient } from "@supabase/supabase-js";
 
-const client = new MongoClient(process.env.MONGO_URI); 
-let db;
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SECRET_KEY;
 
-export async function connectDB() {
-  await client.connect();
-  db = client.db();
-  console.log("MongoDB connected");
+if (!supabaseUrl) {
+  throw new Error("SUPABASE_URL is missing from .env");
 }
 
-export function getDB() {
-  return db;
+if (!supabaseKey) {
+  throw new Error("SUPABASE_SECRET_KEY is missing from .env");
 }
+
+export const supabase = createClient(
+  supabaseUrl,
+  supabaseKey
+);
