@@ -1,4 +1,4 @@
-import "dotenv/config";
+import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import './config/supabase.js';
@@ -9,6 +9,9 @@ import orderRoutes from "./routes/orderRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 
+import { supabase } from "./config/supabase.js";
+
+dotenv.config();
 const app = express();
 
 // CORS

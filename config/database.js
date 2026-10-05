@@ -1,6 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
-import "dotenv/config";
+import { MongoClient } from "mongodb";
 
+<<<<<<< HEAD
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 
@@ -12,17 +12,17 @@ export const supabase = createClient(
   supabaseUrl,
   supabaseServiceKey
 );
+=======
+const client = new MongoClient(process.env.MONGO_URI); 
+let db;
+>>>>>>> 0b9fbae56d3853349af76c238f91d6889dfef963
 
 export async function connectDB() {
-  const { error } = await supabase
-    .from("orders")
-    .select("id")
-    .limit(1);
+  await client.connect();
+  db = client.db();
+  console.log("MongoDB connected");
+}
 
-  if (error) {
-    console.error("Supabase connection failed:", error.message);
-    throw error;
-  }
-
-  console.log("Supabase connected");
+export function getDB() {
+  return db;
 }

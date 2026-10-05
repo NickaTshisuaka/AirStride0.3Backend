@@ -14,6 +14,6 @@ router.post("/", firebaseAuth, createOrder);
 router.get("/", firebaseAuth, getAllOrders);
 router.get("/:id", firebaseAuth, getOrderById);
 router.put("/:id", firebaseAuth, updateOrder);
-router.delete("/:id", firebaseAuth, deleteOrder);
+router.delete("/:id", deleteOrder);
 
 export default router;
