@@ -90,7 +90,7 @@ import { supabase } from "../config/supabase.js";
 //   }
 // };
 
-import { supabase } from "../config/supabase.js"; // Adjust the import path as needed
+import { supabase } from "../config/supabase.js";
 
 export const createOrder = async (req, res) => {
   try {
@@ -102,7 +102,6 @@ export const createOrder = async (req, res) => {
 
     let total = 0;
 
-    // Validate items and calculate total price
     for (const item of items) {
       if (!item.productId || typeof item.quantity !== "number" || item.quantity <= 0) {
         return res.status(400).json({ error: "Invalid item structure" });
@@ -122,7 +121,6 @@ export const createOrder = async (req, res) => {
       created_at: new Date().toISOString(),
     };
 
-    // 1. Insert the parent order
     const { data: orderData, error: orderError } = await supabase
       .from("orders")
       .insert(orderPayload)
@@ -134,7 +132,6 @@ export const createOrder = async (req, res) => {
       return res.status(500).json({ error: "Server error creating order" });
     }
 
-    // 2. Prepare child item objects with the new order ID
     const orderItems = items.map((item) => ({
       order_id: orderData.id,
       product_id: String(item.productId),
@@ -143,7 +140,6 @@ export const createOrder = async (req, res) => {
       unit_price: item.price,
     }));
 
-    // 3. Insert child items into order_items
     const { data: insertedItems, error: itemsError } = await supabase
       .from("order_items")
       .insert(orderItems)
@@ -151,12 +147,10 @@ export const createOrder = async (req, res) => {
 
     if (itemsError) {
       console.error("Create order items error:", itemsError);
-      // Rollback: Delete the parent order if child records fail
       await supabase.from("orders").delete().eq("id", orderData.id);
       return res.status(500).json({ error: "Server error creating order items" });
     }
 
-    // Return combined result
     return res.status(201).json({
       ...orderData,
       items: insertedItems,

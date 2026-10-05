@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { supabase } from "../config/database.js";
 
 export const getAllProducts = async (req, res) => {
@@ -10,37 +9,18 @@ export const getAllProducts = async (req, res) => {
 
     if (error) {
       console.error("Get products error:", error);
-
-      return res.status(500).json({
-        error: "Failed to fetch products",
-      });
+      return res.status(500).json({ error: "Failed to fetch products" });
     }
-  }
 
-    res.json(products);
+    return res.json(products);
   } catch (err) {
-    console.error("Get products error:", err);
-
-    res.status(500).json({
-      error: "Failed to fetch products",
-    });
-
-import { supabase } from "../config/supabase.js";
-import { ObjectId } from "mongodb";
-
-export const getAllProducts = async (req, res) => {
-  try {
-    const products = await getDB().collection("products").find().toArray();
-    res.json(products);
-  } catch {
-    res.status(500).json({ error: "Failed to fetch products" });
-
+    console.error("Get products catch error:", err);
+    return res.status(500).json({ error: "Failed to fetch products" });
   }
 };
 
 export const createProduct = async (req, res) => {
   try {
-
     const productData = {
       ...req.body,
     };
@@ -53,38 +33,19 @@ export const createProduct = async (req, res) => {
 
     if (error) {
       console.error("Create product error:", error);
-
-      return res.status(500).json({
-        error: "Failed to create product",
-      });
+      return res.status(500).json({ error: "Failed to create product" });
     }
 
-    res.status(201).json(product);
+    return res.status(201).json(product);
   } catch (err) {
-    console.error("Create product error:", err);
-
-    res.status(500).json({
-      error: "Failed to create product",
-
-    const result = await getDB().collection("products").insertOne({
-      ...req.body,
-      createdAt: new Date(),
-    }
-
-    });
-
-    res.status(201).json({ _id: result.insertedId, ...req.body });
-  } catch {
-    res.status(500).json({ error: "Failed to create product" });
+    console.error("Create product catch error:", err);
+    return res.status(500).json({ error: "Failed to create product" });
   }
 };
 
 export const getProductById = async (req, res) => {
   try {
-    const product = await getDB()
-      .collection("products")
-      .findOne({ _id: new ObjectId(req.params.id) });
-
+    const { id } = req.params;
 
     const { data: product, error } = await supabase
       .from("products")
@@ -93,33 +54,20 @@ export const getProductById = async (req, res) => {
       .single();
 
     if (error || !product) {
-      return res.status(404).json({
-        error: "Product not found",
-      });
+      console.error("Get product by ID error:", error);
+      return res.status(404).json({ error: "Product not found" });
     }
 
-    res.json(product);
+    return res.json(product);
   } catch (err) {
-    console.error("Get product error:", err);
-
-    res.status(500).json({
-      error: "Error fetching product",
-    });
-
-    if (!product) return res.status(404).json({ error: "Not found" });
-
-    res.json(product);
-  } catch {
-    res.status(500).json({ error: "Error fetching product" });
-
+    console.error("Get product catch error:", err);
+    return res.status(500).json({ error: "Error fetching product" });
   }
 };
 
 export const updateProduct = async (req, res) => {
   try {
-    await getDB()
-      .collection("products")
-      .updateOne({ _id: new ObjectId(req.params.id) }, { $set: req.body });
+    const { id } = req.params;
 
     const { data: product, error } = await supabase
       .from("products")
@@ -130,36 +78,22 @@ export const updateProduct = async (req, res) => {
 
     if (error || !product) {
       console.error("Update product error:", error);
-
-      return res.status(404).json({
-        error: "Product not found",
-      });
+      return res.status(404).json({ error: "Product not found" });
     }
 
-    res.json({
+    return res.json({
       message: "Updated successfully",
       product,
     });
   } catch (err) {
-    console.error("Update product error:", err);
-
-    res.status(500).json({
-      error: "Failed to update product",
-    });
-
-    res.json({ message: "Updated successfully" });
-  } catch {
-    res.status(500).json({ error: "Failed to update product" });
-
+    console.error("Update product catch error:", err);
+    return res.status(500).json({ error: "Failed to update product" });
   }
 };
 
 export const deleteProduct = async (req, res) => {
   try {
-    await getDB()
-      .collection("products")
-      .deleteOne({ _id: new ObjectId(req.params.id) });
-
+    const { id } = req.params;
 
     const { data: product, error } = await supabase
       .from("products")
@@ -169,24 +103,16 @@ export const deleteProduct = async (req, res) => {
       .single();
 
     if (error || !product) {
-      return res.status(404).json({
-        error: "Product not found",
-      });
+      console.error("Delete product error:", error);
+      return res.status(404).json({ error: "Product not found" });
     }
 
-    res.json({
-      message: "Product deleted",
+    return res.json({
+      message: "Product deleted successfully",
+      product,
     });
   } catch (err) {
-    console.error("Delete product error:", err);
-
-    res.status(500).json({
-      error: "Failed to delete product",
-    });
-
-    res.json({ message: "Product deleted" });
-  } catch {
-    res.status(500).json({ error: "Failed to delete product" });
-
+    console.error("Delete product catch error:", err);
+    return res.status(500).json({ error: "Failed to delete product" });
   }
 };
