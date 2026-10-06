@@ -1,118 +1,234 @@
 import { supabase } from "../config/database.js";
 
+const TABLE = "products";
+
+// GET ALL PRODUCTS
 export const getAllProducts = async (req, res) => {
   try {
-    const { data: products, error } = await supabase
-      .from("products")
+    const { data, error } = await supabase
+      .from(TABLE)
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("product_id", { ascending: true });
 
     if (error) {
-      console.error("Get products error:", error);
-      return res.status(500).json({ error: "Failed to fetch products" });
+      console.error("Supabase get products error:", error);
+      return res.status(500).json({
+        error: "Failed to fetch products",
+        details: error.message,
+      });
     }
 
-    return res.json(products);
-  } catch (err) {
-    console.error("Get products catch error:", err);
-    return res.status(500).json({ error: "Failed to fetch products" });
+    res.json(data || []);
+  } catch (error) {
+    console.error("Get products error:", error);
+
+    res.status(500).json({
+      error: "Failed to fetch products",
+      details: error.message,
+    });
   }
 };
 
+// CREATE PRODUCT
 export const createProduct = async (req, res) => {
   try {
-    const productData = {
-      ...req.body,
+    const {
+      name,
+      category_id,
+      price,
+      description,
+      tags,
+      inventory_count,
+      available_sizes,
+      brand,
+      material,
+      image,
+    } = req.body;
+
+    if (!name || price === undefined) {
+      return res.status(400).json({
+        error: "Name and price are required",
+      });
+    }
+
+    const product = {
+      name,
+      category_id: category_id || null,
+      price,
+      description: description || "",
+      tags: tags || [],
+      inventory_count: inventory_count ?? 0,
+      available_sizes: available_sizes || [],
+      brand: brand || "",
+      material: material || "",
+      image: image || "",
     };
 
-    const { data: product, error } = await supabase
-      .from("products")
-      .insert(productData)
+    const { data, error } = await supabase
+      .from(TABLE)
+      .insert(product)
       .select()
       .single();
 
     if (error) {
-      console.error("Create product error:", error);
-      return res.status(500).json({ error: "Failed to create product" });
+      console.error("Supabase create product error:", error);
+
+      return res.status(500).json({
+        error: "Failed to create product",
+        details: error.message,
+      });
     }
 
-    return res.status(201).json(product);
-  } catch (err) {
-    console.error("Create product catch error:", err);
-    return res.status(500).json({ error: "Failed to create product" });
+    res.status(201).json(data);
+  } catch (error) {
+    console.error("Create product error:", error);
+
+    res.status(500).json({
+      error: "Failed to create product",
+      details: error.message,
+    });
   }
 };
 
+// GET PRODUCT BY ID
 export const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { data: product, error } = await supabase
-      .from("products")
+    const { data, error } = await supabase
+      .from(TABLE)
       .select("*")
-      .eq("id", id)
-      .single();
+      .eq("product_id", id)
+      .maybeSingle();
 
-    if (error || !product) {
-      console.error("Get product by ID error:", error);
-      return res.status(404).json({ error: "Product not found" });
+    if (error) {
+      console.error("Supabase get product error:", error);
+
+      return res.status(500).json({
+        error: "Error fetching product",
+        details: error.message,
+      });
     }
 
-    return res.json(product);
-  } catch (err) {
-    console.error("Get product catch error:", err);
-    return res.status(500).json({ error: "Error fetching product" });
+    if (!data) {
+      return res.status(404).json({
+        error: "Product not found",
+      });
+    }
+
+    res.json(data);
+  } catch (error) {
+    console.error("Get product error:", error);
+
+    res.status(500).json({
+      error: "Error fetching product",
+      details: error.message,
+    });
   }
 };
 
+// UPDATE PRODUCT
 export const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { data: product, error } = await supabase
-      .from("products")
-      .update(req.body)
-      .eq("id", id)
-      .select()
-      .single();
+    const allowedFields = [
+      "name",
+      "category_id",
+      "price",
+      "description",
+      "tags",
+      "inventory_count",
+      "available_sizes",
+      "brand",
+      "material",
+      "image",
+    ];
 
-    if (error || !product) {
-      console.error("Update product error:", error);
-      return res.status(404).json({ error: "Product not found" });
+    const updates = {};
+
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
     }
 
-    return res.json({
-      message: "Updated successfully",
-      product,
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        error: "No valid fields to update",
+      });
+    }
+
+    const { data, error } = await supabase
+      .from(TABLE)
+      .update(updates)
+      .eq("product_id", id)
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      console.error("Supabase update product error:", error);
+
+      return res.status(500).json({
+        error: "Failed to update product",
+        details: error.message,
+      });
+    }
+
+    if (!data) {
+      return res.status(404).json({
+        error: "Product not found",
+      });
+    }
+
+    res.json(data);
+  } catch (error) {
+    console.error("Update product error:", error);
+
+    res.status(500).json({
+      error: "Failed to update product",
+      details: error.message,
     });
-  } catch (err) {
-    console.error("Update product catch error:", err);
-    return res.status(500).json({ error: "Failed to update product" });
   }
 };
 
+// DELETE PRODUCT
 export const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { data: product, error } = await supabase
-      .from("products")
+    const { data, error } = await supabase
+      .from(TABLE)
       .delete()
-      .eq("id", id)
+      .eq("product_id", id)
       .select()
-      .single();
+      .maybeSingle();
 
-    if (error || !product) {
-      console.error("Delete product error:", error);
-      return res.status(404).json({ error: "Product not found" });
+    if (error) {
+      console.error("Supabase delete product error:", error);
+
+      return res.status(500).json({
+        error: "Failed to delete product",
+        details: error.message,
+      });
     }
 
-    return res.json({
-      message: "Product deleted successfully",
-      product,
+    if (!data) {
+      return res.status(404).json({
+        error: "Product not found",
+      });
+    }
+
+    res.json({
+      message: "Product deleted",
+      product: data,
     });
-  } catch (err) {
-    console.error("Delete product catch error:", err);
-    return res.status(500).json({ error: "Failed to delete product" });
+  } catch (error) {
+    console.error("Delete product error:", error);
+
+    res.status(500).json({
+      error: "Failed to delete product",
+      details: error.message,
+    });
   }
 };

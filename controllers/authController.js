@@ -1,12 +1,4 @@
 import bcrypt from "bcryptjs";
-<<<<<<< HEAD
-import { supabase } from "../config/database.js";
-
-export const signup = async (req, res) => {
-  try {
-    const { username, password, email, firstName, lastName, phone, address } =
-      req.body;
-=======
 import jwt from "jsonwebtoken";
 import { supabase } from "../config/database.js";
 
@@ -35,7 +27,6 @@ export const signup = async (req, res) => {
       phone,
       address,
     } = req.body;
->>>>>>> 0b9fbae56d3853349af76c238f91d6889dfef963
 
     if (!username || !password || !firstName || !lastName) {
       return res.status(400).json({
@@ -56,7 +47,6 @@ export const signup = async (req, res) => {
         error: "Server error checking username",
       });
     }
-
     if (existingUser) {
       return res.status(409).json({
         error: "Username already taken",
@@ -97,20 +87,13 @@ export const signup = async (req, res) => {
 
     return res.status(201).json({
       message: "User created",
-<<<<<<< HEAD
-=======
       token,
->>>>>>> 0b9fbae56d3853349af76c238f91d6889dfef963
       user,
     });
   } catch (err) {
     console.error("Signup error:", err);
 
-<<<<<<< HEAD
-    res.status(500).json({
-=======
     return res.status(500).json({
->>>>>>> 0b9fbae56d3853349af76c238f91d6889dfef963
       error: "Server error during signup",
     });
   }
@@ -170,19 +153,12 @@ export const login = async (req, res) => {
 
     return res.json({
       message: "Login successful",
-<<<<<<< HEAD
-=======
       token,
->>>>>>> 0b9fbae56d3853349af76c238f91d6889dfef963
       user,
     });
   } catch (err) {
     console.error("Login error:", err);
 
-<<<<<<< HEAD
-    res.status(500).json({
-      error: "Server error during login",
-=======
     return res.status(500).json({
       error: "Server error during login",
     });
@@ -273,7 +249,6 @@ export const changePassword = async (req, res) => {
 
     return res.status(500).json({
       error: "Server error changing password",
->>>>>>> 0b9fbae56d3853349af76c238f91d6889dfef963
     });
   }
 };

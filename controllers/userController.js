@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-import { supabase } from "../config/database.js";
-=======
 import { supabase } from "../config/supabase.js";
 
 
@@ -48,49 +45,44 @@ import { supabase } from "../config/supabase.js";
 //   }
 // };
 
->>>>>>> 0b9fbae56d3853349af76c238f91d6889dfef963
 
 export const getUserByEmail = async (req, res) => {
   try {
-    const { data: user, error } = await supabase.from("users").select("*").eq("email", req.params.email).single();
+    const { data: user, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("email", req.params.email)
+      .single();
 
-  }
     if (error) {
       console.error("Supabase User Error:", error);
 
-    if (error || !user) {
-      return res.status(404).json({
-        error: "User not found",
-      });
-      if (error.code === "PGRST116") {return res.status(404).json({ error: "User not found"});
+      if (error.code === "PGRST116") {
+        return res.status(404).json({ error: "User not found" });
       }
 
-      return res.status(500).json({error: "Error fetching user"});
+      return res.status(500).json({ error: "Error fetching user" });
     }
 
-    if (!user) { return res.status(404).json({error: "User not found"});
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
 
     delete user.passwordHash;
 
-    res.json(user);
+    return res.json(user);
   } catch (err) {
     console.error("Get User Error:", err);
 
-    res.status(500).json({
-      error: "Server error fetching user",
-
     return res.status(500).json({
-      error: "Couldn't get user"
-
+      error: "Server error fetching user",
     });
-  })
-}
+  }
 };
 
 export const updateUserByEmail = async (req, res) => {
   try {
-    const { email } = req.params;
+    const { email } = req.params; // Retained your original variable
     const allowed = ["firstName", "lastName", "phone", "address", "profileImg"];
 
     const updates = {};
@@ -107,16 +99,22 @@ export const updateUserByEmail = async (req, res) => {
       });
     }
 
-    const { data: user, error } = await supabase.from("users").update(updates).eq("email", req.params.email).select("*").single();
+    const { data: user, error } = await supabase
+      .from("users")
+      .update(updates)
+      .eq("email", req.params.email)
+      .select("*")
+      .single();
 
     if (error) {
       console.error("Supabase Update User Error:", error);
 
-      if (error.code === "PGRST116") {return res.status(404).json({error: "User not found"});
+      if (error.code === "PGRST116") {
+        return res.status(404).json({ error: "User not found" });
       }
 
       return res.status(500).json({
-        error: "Server error updating user"
+        error: "Server error updating user",
       });
     }
 
@@ -128,15 +126,12 @@ export const updateUserByEmail = async (req, res) => {
 
     delete user.passwordHash;
 
-    res.json(user);
+    return res.json(user);
   } catch (err) {
     console.error("Update User Error:", err);
 
-    res.status(500).json({
-      error: "Server error updating user",
     return res.status(500).json({
-      error: "Couldn't update user"
+      error: "Server error updating user",
     });
-  })
-}
+  }
 };
